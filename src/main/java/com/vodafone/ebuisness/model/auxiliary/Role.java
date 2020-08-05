@@ -1,4 +1,4 @@
-package com.vodafone.ebuisness.model.auxiliarymodel;
+package com.vodafone.ebuisness.model.auxiliary;
 
 public class Role {
 

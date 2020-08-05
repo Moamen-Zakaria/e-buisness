@@ -1,7 +1,6 @@
 package com.vodafone.ebuisness.model.main;
 
-import com.vodafone.ebuisness.model.auxiliarymodel.ProductInCart;
-import lombok.Data;
+import com.vodafone.ebuisness.model.auxiliary.ProductInCart;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
@@ -9,7 +8,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
 
-@Data
 @Document(collation = "Products_in_deal")
 public class ProductsInDeal {
 
@@ -24,4 +22,44 @@ public class ProductsInDeal {
     @DBRef
     private Payment payment;
 
+    public ProductsInDeal() {
+    }
+
+    public ProductsInDeal(List<ProductInCart> productInCartList, Account account, Payment payment) {
+        this.productInCartList = productInCartList;
+        this.account = account;
+        this.payment = payment;
+    }
+
+    public ObjectId get_id() {
+        return _id;
+    }
+
+    public void set_id(ObjectId _id) {
+        this._id = _id;
+    }
+
+    public List<ProductInCart> getProductInCartList() {
+        return productInCartList;
+    }
+
+    public void setProductInCartList(List<ProductInCart> productInCartList) {
+        this.productInCartList = productInCartList;
+    }
+
+    public Account getAccount() {
+        return account;
+    }
+
+    public void setAccount(Account account) {
+        this.account = account;
+    }
+
+    public Payment getPayment() {
+        return payment;
+    }
+
+    public void setPayment(Payment payment) {
+        this.payment = payment;
+    }
 }
