@@ -1,5 +1,7 @@
 package com.vodafone.ebuisness.model.main;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.vodafone.ebuisness.model.auxiliary.Address;
 import com.vodafone.ebuisness.model.auxiliary.Date;
 import com.vodafone.ebuisness.model.auxiliary.PersonName;
@@ -15,7 +17,8 @@ import java.util.List;
 public class Account {
 
     @Id
-    private ObjectId _id;
+    @JsonSerialize(using= ToStringSerializer.class)
+    private ObjectId objectId;
 
     @Field("date_of_birth")
     private Date dateOfBirth;
@@ -37,12 +40,12 @@ public class Account {
     }
 
 
-    public ObjectId get_id() {
-        return _id;
+    public ObjectId getObjectId() {
+        return objectId;
     }
 
-    public void set_id(ObjectId _id) {
-        this._id = _id;
+    public void setObjectId(ObjectId objectId) {
+        this.objectId = objectId;
     }
 
     public Date getDateOfBirth() {

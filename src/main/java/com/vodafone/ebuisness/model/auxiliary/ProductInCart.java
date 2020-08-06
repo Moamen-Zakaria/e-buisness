@@ -7,12 +7,12 @@ public class ProductInCart {
 
     @DBRef
     private Product product;
-    private int requiredQuantity;
+    private Integer requiredQuantity;
 
     public ProductInCart() {
     }
 
-    public ProductInCart(Product product, int requiredQuantity) {
+    public ProductInCart(Product product, Integer requiredQuantity) {
         this.product = product;
         this.requiredQuantity = requiredQuantity;
     }
@@ -32,11 +32,11 @@ public class ProductInCart {
         this.product = product;
     }
 
-    public int getRequiredQuantity() {
+    public Integer getRequiredQuantity() {
         return requiredQuantity;
     }
 
-    public void setRequiredQuantity(int requiredQuantity) {
+    public void setRequiredQuantity(Integer requiredQuantity) {
         this.requiredQuantity = requiredQuantity;
     }
 }

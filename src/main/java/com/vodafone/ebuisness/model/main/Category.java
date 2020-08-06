@@ -1,5 +1,7 @@
 package com.vodafone.ebuisness.model.main;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -10,7 +12,8 @@ import java.util.List;
 public class Category {
 
     @Id
-    private ObjectId _id;
+    @JsonSerialize(using= ToStringSerializer.class)
+    private ObjectId objectId;
 
     private String name;
     private String description;
@@ -25,12 +28,12 @@ public class Category {
         this.subscribers = subscribers;
     }
 
-    public ObjectId get_id() {
-        return _id;
+    public ObjectId getObjectId() {
+        return objectId;
     }
 
-    public void set_id(ObjectId _id) {
-        this._id = _id;
+    public void setObjectId(ObjectId objectId) {
+        this.objectId = objectId;
     }
 
     public String getName() {

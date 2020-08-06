@@ -1,21 +1,31 @@
 package com.vodafone.ebuisness.model.main;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
 import java.util.List;
 
 @Document
 public class Product {
 
     @Id
-    private ObjectId _id;
+    @JsonSerialize(using= ToStringSerializer.class)
+    private ObjectId objectId;
+
+    @NotBlank
     private String name;
+
     private String description;
-    private int quantity;
-    private float price;
+    private Integer quantity;
+
+    @Min(value = 1, message = "Error: Price can't be below 1")
+    private Double price;
 
     @DBRef
     private List<Category> categories;
@@ -23,7 +33,7 @@ public class Product {
     public Product() {
     }
 
-    public Product(String name, String description, int quantity, float price, List<Category> categories) {
+    public Product(String name, String description, int quantity, Double price, List<Category> categories) {
         this.name = name;
         this.description = description;
         this.quantity = quantity;
@@ -31,12 +41,12 @@ public class Product {
         this.categories = categories;
     }
 
-    public ObjectId get_id() {
-        return _id;
+    public ObjectId getObjectId() {
+        return objectId;
     }
 
-    public void set_id(ObjectId _id) {
-        this._id = _id;
+    public void setObjectId(ObjectId objectId) {
+        this.objectId = objectId;
     }
 
     public String getName() {
@@ -55,19 +65,19 @@ public class Product {
         this.description = description;
     }
 
-    public int getQuantity() {
+    public Integer getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(int quantity) {
+    public void setQuantity(Integer quantity) {
         this.quantity = quantity;
     }
 
-    public float getPrice() {
+    public Double getPrice() {
         return price;
     }
 
-    public void setPrice(float price) {
+    public void setPrice(Double price) {
         this.price = price;
     }
 

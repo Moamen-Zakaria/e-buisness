@@ -2,9 +2,9 @@ package com.vodafone.ebuisness.model.auxiliary;
 
 public class Date {
 
-    private int year;
-    private int month;
-    private int day;
+    private Integer year;
+    private Integer month;
+    private Integer day;
 
     public Date() {
     }
@@ -15,27 +15,27 @@ public class Date {
         this.day = day;
     }
 
-    public int getYear() {
+    public Integer getYear() {
         return year;
     }
 
-    public void setYear(int year) {
+    public void setYear(Integer year) {
         this.year = year;
     }
 
-    public int getMonth() {
+    public Integer getMonth() {
         return month;
     }
 
-    public void setMonth(int month) {
+    public void setMonth(Integer month) {
         this.month = month;
     }
 
-    public int getDay() {
+    public Integer getDay() {
         return day;
     }
 
-    public void setDay(int day) {
+    public void setDay(Integer day) {
         this.day = day;
     }
 }

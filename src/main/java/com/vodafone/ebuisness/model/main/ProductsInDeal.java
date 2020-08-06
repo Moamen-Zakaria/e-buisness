@@ -1,5 +1,7 @@
 package com.vodafone.ebuisness.model.main;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.vodafone.ebuisness.model.auxiliary.ProductInCart;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
@@ -12,7 +14,8 @@ import java.util.List;
 public class ProductsInDeal {
 
     @Id
-    private ObjectId _id;
+    @JsonSerialize(using= ToStringSerializer.class)
+    private ObjectId objectId;
 
     private List<ProductInCart> productInCartList;
 
@@ -31,12 +34,12 @@ public class ProductsInDeal {
         this.payment = payment;
     }
 
-    public ObjectId get_id() {
-        return _id;
+    public ObjectId getObjectId() {
+        return objectId;
     }
 
-    public void set_id(ObjectId _id) {
-        this._id = _id;
+    public void setObjectId(ObjectId objectId) {
+        this.objectId = objectId;
     }
 
     public List<ProductInCart> getProductInCartList() {

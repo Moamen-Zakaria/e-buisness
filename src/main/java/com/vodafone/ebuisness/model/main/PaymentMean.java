@@ -1,5 +1,7 @@
 package com.vodafone.ebuisness.model.main;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -8,7 +10,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class PaymentMean {
 
     @Id
-    private ObjectId _id;
+    @JsonSerialize(using= ToStringSerializer.class)
+    private ObjectId objectId;
 
     //no data in this class as this class's data's form is not decided yet
     private String mean;

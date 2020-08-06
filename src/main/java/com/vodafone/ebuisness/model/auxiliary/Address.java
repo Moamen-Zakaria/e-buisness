@@ -2,12 +2,12 @@ package com.vodafone.ebuisness.model.auxiliary;
 
 public class Address {
 
-    private int blockNo;
-    private int postalCode;
+    private Integer blockNo;
+    private Integer postalCode;
     private String street;
     private String district;
-    private int departmentNo;
-    private int floor;
+    private Integer departmentNo;
+    private Integer floor;
     private String country;
     private String city;
     private String province;
@@ -15,20 +15,19 @@ public class Address {
     public Address() {
     }
 
-
-    public int getBlockNo() {
+    public Integer getBlockNo() {
         return blockNo;
     }
 
-    public void setBlockNo(int blockNo) {
+    public void setBlockNo(Integer blockNo) {
         this.blockNo = blockNo;
     }
 
-    public int getPostalCode() {
+    public Integer getPostalCode() {
         return postalCode;
     }
 
-    public void setPostalCode(int postalCode) {
+    public void setPostalCode(Integer postalCode) {
         this.postalCode = postalCode;
     }
 
@@ -48,19 +47,19 @@ public class Address {
         this.district = district;
     }
 
-    public int getDepartmentNo() {
+    public Integer getDepartmentNo() {
         return departmentNo;
     }
 
-    public void setDepartmentNo(int departmentNo) {
+    public void setDepartmentNo(Integer departmentNo) {
         this.departmentNo = departmentNo;
     }
 
-    public int getFloor() {
+    public Integer getFloor() {
         return floor;
     }
 
-    public void setFloor(int floor) {
+    public void setFloor(Integer floor) {
         this.floor = floor;
     }
 

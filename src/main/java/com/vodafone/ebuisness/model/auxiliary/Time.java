@@ -3,14 +3,14 @@ package com.vodafone.ebuisness.model.auxiliary;
 
 public class Time {
 
-    private int hour;
-    private int minute;
-    private int second;
+    private Integer hour;
+    private Integer minute;
+    private Double second;
 
     public Time() {
     }
 
-    public Time(int hour, int minute, int second) {
+    public Time(int hour, int minute, Double second) {
         this.hour = hour;
         this.minute = minute;
         this.second = second;
@@ -32,11 +32,11 @@ public class Time {
         this.minute = minute;
     }
 
-    public int getSecond() {
+    public Double getSecond() {
         return second;
     }
 
-    public void setSecond(int second) {
+    public void setSecond(Double second) {
         this.second = second;
     }
 }
