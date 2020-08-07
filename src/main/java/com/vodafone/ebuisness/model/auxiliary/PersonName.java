@@ -1,11 +1,15 @@
 package com.vodafone.ebuisness.model.auxiliary;
 
+import javax.validation.constraints.NotBlank;
+
 public class PersonName {
 
+    @NotBlank
     private String firstName;
 
     private String middleName;
 
+    @NotBlank
     private String lastName;
 
     public PersonName() {

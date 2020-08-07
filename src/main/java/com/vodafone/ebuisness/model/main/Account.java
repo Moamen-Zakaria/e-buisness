@@ -10,8 +10,11 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
-
+import javax.validation.Valid;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
 import java.util.List;
+import java.util.Set;
 
 @Document
 public class Account {
@@ -23,17 +26,25 @@ public class Account {
     @Field("date_of_birth")
     private Date dateOfBirth;
 
+    @Email
+    @NotBlank
     private String email;
+
+    @NotBlank(message = "Username field is required!")
     private String username;
+
+    @NotBlank(message = "Password field is required!")
     private String password;
+
     private Address address;
 
     @Field("name")
+    @Valid
     private PersonName personName;
 
-    private List<String> roles;
+    private Set<String> roles;
 
-    @DBRef
+//    @DBRef
     private List<PaymentMean> paymentMeans;
 
     public Account() {
@@ -96,11 +107,11 @@ public class Account {
         this.personName = personName;
     }
 
-    public List<String> getRoles() {
+    public Set<String> getRoles() {
         return roles;
     }
 
-    public void setRoles(List<String> roles) {
+    public void setRoles(Set<String> roles) {
         this.roles = roles;
     }
 
