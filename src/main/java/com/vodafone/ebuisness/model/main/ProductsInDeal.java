@@ -10,7 +10,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
 
-@Document(collation = "Products_in_deal")
+@Document(collection = "products_in_deal")
 public class ProductsInDeal {
 
     @Id

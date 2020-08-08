@@ -1,5 +1,6 @@
 package com.vodafone.ebuisness.service.impl;
 
+import com.vodafone.ebuisness.exception.NoSuchProductException;
 import com.vodafone.ebuisness.model.main.Category;
 import com.vodafone.ebuisness.model.main.Product;
 import com.vodafone.ebuisness.repository.CategoryRepository;
@@ -33,8 +34,13 @@ public class ProductsAndCategoriesServiceImpl implements ProductsAndCategoriesSe
     }
 
     @Override
-    public Product findProductById(ObjectId _id) {
+    public Product findProductById(ObjectId _id) throws NoSuchProductException {
 
+        if (!productRepository.findById(_id).isPresent()) {
+
+            throw new NoSuchProductException();
+
+        }
         return productRepository.findById(_id).get();
     }
 

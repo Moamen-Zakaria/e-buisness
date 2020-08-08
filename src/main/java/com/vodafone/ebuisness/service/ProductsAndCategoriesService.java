@@ -1,5 +1,6 @@
 package com.vodafone.ebuisness.service;
 
+import com.vodafone.ebuisness.exception.NoSuchProductException;
 import com.vodafone.ebuisness.model.main.Category;
 import com.vodafone.ebuisness.model.main.Product;
 import org.bson.types.ObjectId;
@@ -12,7 +13,7 @@ public interface ProductsAndCategoriesService {
 
     List<Product> getAllProducts();
 
-    Product findProductById(ObjectId _id);
+    Product findProductById(ObjectId _id) throws NoSuchProductException;
 
     Boolean saveOrUpdateProduct(Product product);
 

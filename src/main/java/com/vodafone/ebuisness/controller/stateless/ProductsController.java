@@ -1,5 +1,6 @@
 package com.vodafone.ebuisness.controller.stateless;
 
+import com.vodafone.ebuisness.exception.NoSuchProductException;
 import com.vodafone.ebuisness.model.main.Category;
 import com.vodafone.ebuisness.model.main.Product;
 import com.vodafone.ebuisness.service.ProductsAndCategoriesService;
@@ -26,7 +27,7 @@ public class ProductsController {
     }
 
     @GetMapping("/{id}")
-    public Product getProductById(@PathVariable("id") String id) {
+    public Product getProductById(@PathVariable("id") String id) throws NoSuchProductException {
         System.out.println(id);
         return productsAndCategoriesService.findProductById(new ObjectId(id));
     }
