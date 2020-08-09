@@ -46,4 +46,9 @@ class GlobalControllerExceptionHandler extends ResponseEntityExceptionHandler {
     public void handleItemOutOfStockException(WebRequest request) {
     }
 
+    @ResponseStatus(value = HttpStatus.CONFLICT, reason = "No Such Category Exception!")
+    @ExceptionHandler(NoSuchCategoryException.class)
+    public void handleNoSuchCategoryException(WebRequest request) {
+    }
+
 }

@@ -1,5 +1,6 @@
 package com.vodafone.ebuisness.service.impl;
 
+import com.vodafone.ebuisness.exception.NoSuchCategoryException;
 import com.vodafone.ebuisness.exception.NoSuchProductException;
 import com.vodafone.ebuisness.model.main.Category;
 import com.vodafone.ebuisness.model.main.Product;
@@ -9,6 +10,8 @@ import com.vodafone.ebuisness.service.ProductsAndCategoriesService;
 
 import org.bson.types.ObjectId;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +25,54 @@ public class ProductsAndCategoriesServiceImpl implements ProductsAndCategoriesSe
 
     @Autowired
     CategoryRepository categoryRepository;
+
+    @Override
+    public void addCategoryToProduct(String categoryId, String productId) throws NoSuchProductException, NoSuchCategoryException {
+
+        var optionalProduct = productRepository.findById(new ObjectId(productId));
+        var optionalCategory = categoryRepository.findById(new ObjectId(categoryId));
+        Product product;
+        Category category;
+
+        if (!optionalProduct.isPresent()) {
+            throw new NoSuchProductException();
+        } else {
+            product = optionalProduct.get();
+        }
+        if (!optionalCategory.isPresent()) {
+            throw new NoSuchCategoryException();
+        } else {
+            category = optionalCategory.get();
+        }
+        if (product.getCategories() == null) {
+            product.setCategories(new ArrayList<>());
+        }
+        product.getCategories().add(category);
+        productRepository.save(product);
+    }
+
+    @Override
+    public void removeCategoryFromProduct(String categoryId, String productId)
+            throws NoSuchProductException, NoSuchCategoryException {
+        var optionalProduct = productRepository.findById(new ObjectId(productId));
+        var optionalCategory = categoryRepository.findById(new ObjectId(categoryId));
+        Product product;
+        Category category;
+
+        if (!optionalProduct.isPresent()) {
+            throw new NoSuchProductException();
+        } else {
+            product = optionalProduct.get();
+        }
+        if (!optionalCategory.isPresent()) {
+            throw new NoSuchCategoryException();
+        } else {
+            category = optionalCategory.get();
+        }
+        if (!(product.getCategories() == null)) {
+            product.getCategories().remove(category);
+        }
+    }
 
     @Override
     public List<Product> getAllProducts() {

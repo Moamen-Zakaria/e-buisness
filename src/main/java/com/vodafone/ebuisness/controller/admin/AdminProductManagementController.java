@@ -1,5 +1,7 @@
 package com.vodafone.ebuisness.controller.admin;
 
+import com.vodafone.ebuisness.exception.NoSuchCategoryException;
+import com.vodafone.ebuisness.exception.NoSuchProductException;
 import com.vodafone.ebuisness.model.main.Category;
 import com.vodafone.ebuisness.model.main.Product;
 import com.vodafone.ebuisness.service.ProductsAndCategoriesService;
@@ -10,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
 
 @RestController
 @RequestMapping("/admin/retail")
@@ -48,7 +51,24 @@ public class AdminProductManagementController {
 
         productsAndCategoriesService.deleteCategory(new ObjectId(id));
         return new ResponseEntity("success!", HttpStatus.NO_CONTENT);
+    }
 
+    @PostMapping("/categories/add/to/product")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void addCategoryToProduct(
+            @RequestParam @NotBlank String categoryId,
+            @RequestParam @NotBlank String productId)
+            throws NoSuchProductException, NoSuchCategoryException {
+        productsAndCategoriesService.addCategoryToProduct(categoryId, productId);
+    }
+
+    @DeleteMapping("/categories/remove/from/product")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void removeCategoryFromProduct(
+            @RequestParam @NotBlank String categoryId,
+            @RequestParam @NotBlank String productId)
+            throws NoSuchProductException, NoSuchCategoryException {
+        productsAndCategoriesService.removeCategoryFromProduct(categoryId, productId);
     }
 
 }

@@ -6,7 +6,9 @@ import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import javax.validation.constraints.NotBlank;
 import java.util.List;
+import java.util.Set;
 
 @Document
 public class Category {
@@ -15,14 +17,16 @@ public class Category {
     @JsonSerialize(using= ToStringSerializer.class)
     private ObjectId objectId;
 
+    @NotBlank
     private String name;
+
     private String description;
-    private List<String> subscribers;
+    private Set<String> subscribers;
 
     public Category() {
     }
 
-    public Category( String name, String description, List<String> subscribers) {
+    public Category( String name, String description, Set<String> subscribers) {
         this.name = name;
         this.description = description;
         this.subscribers = subscribers;
@@ -52,11 +56,11 @@ public class Category {
         this.description = description;
     }
 
-    public List<String> getSubscribers() {
+    public Set<String> getSubscribers() {
         return subscribers;
     }
 
-    public void setSubscribers(List<String> subscribers) {
+    public void setSubscribers(Set<String> subscribers) {
         this.subscribers = subscribers;
     }
 }

@@ -1,5 +1,6 @@
 package com.vodafone.ebuisness.service;
 
+import com.vodafone.ebuisness.exception.NoSuchCategoryException;
 import com.vodafone.ebuisness.exception.NoSuchProductException;
 import com.vodafone.ebuisness.model.main.Category;
 import com.vodafone.ebuisness.model.main.Product;
@@ -10,6 +11,10 @@ import java.util.List;
 
 @Service
 public interface ProductsAndCategoriesService {
+
+    void addCategoryToProduct(String category, String product) throws NoSuchProductException, NoSuchCategoryException;
+
+    void removeCategoryFromProduct(String category, String product) throws NoSuchProductException, NoSuchCategoryException;
 
     List<Product> getAllProducts();
 
