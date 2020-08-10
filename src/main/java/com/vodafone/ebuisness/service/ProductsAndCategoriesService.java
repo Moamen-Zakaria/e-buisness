@@ -20,6 +20,9 @@ public interface ProductsAndCategoriesService {
 
     Product findProductById(ObjectId _id) throws NoSuchProductException;
 
+    Category findCategoryById(ObjectId _id)
+            throws NoSuchCategoryException;
+
     Boolean saveOrUpdateProduct(Product product);
 
     Boolean saveOrUpdateCategory(Category category);

@@ -87,12 +87,24 @@ public class ProductsAndCategoriesServiceImpl implements ProductsAndCategoriesSe
     @Override
     public Product findProductById(ObjectId _id) throws NoSuchProductException {
 
-        if (!productRepository.findById(_id).isPresent()) {
+        var optionalProduct = productRepository.findById(_id);
+        if (!optionalProduct.isPresent()) {
 
             throw new NoSuchProductException();
 
         }
-        return productRepository.findById(_id).get();
+        return optionalProduct.get();
+    }
+
+    @Override
+    public Category findCategoryById(ObjectId _id)
+            throws NoSuchCategoryException {
+
+        var optionalCategory = categoryRepository.findById(_id);
+        if (!optionalCategory.isPresent()) {
+            throw new NoSuchCategoryException();
+        }
+        return optionalCategory.get();
     }
 
     @Override
