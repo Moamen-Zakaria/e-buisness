@@ -1,6 +1,7 @@
 package com.vodafone.ebuisness.exceptionhandler;
 
 import com.vodafone.ebuisness.exception.*;
+import org.apache.tomcat.util.http.fileupload.impl.SizeLimitExceededException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -49,6 +50,27 @@ class GlobalControllerExceptionHandler extends ResponseEntityExceptionHandler {
     @ResponseStatus(value = HttpStatus.CONFLICT, reason = "No Such Category Exception!")
     @ExceptionHandler(NoSuchCategoryException.class)
     public void handleNoSuchCategoryException(WebRequest request) {
+    }
+
+
+    @ResponseStatus(value = HttpStatus.CONFLICT, reason = "No room for more images for this product!")
+    @ExceptionHandler(NoRoomForImageOfProductException.class)
+    public void handleNoRoomForImageOfProduct(WebRequest request) {
+    }
+
+    @ResponseStatus(value = HttpStatus.CONFLICT, reason = "Image doesn't Exist!")
+    @ExceptionHandler(ImageDoesNotExistException.class)
+    public void handleImageDoesNotExist(WebRequest request) {
+    }
+
+    @ResponseStatus(value = HttpStatus.UNSUPPORTED_MEDIA_TYPE, reason = "Invalid image format")
+    @ExceptionHandler(InvalidImageFormatException.class)
+    public void handleInvalidImageFormatException(WebRequest request) {
+    }
+
+    @ResponseStatus(value = HttpStatus.BAD_REQUEST, reason = "File size is too large!")
+    @ExceptionHandler(IllegalStateException.class)
+    public void handleIllegalStateException(WebRequest request) {
     }
 
 }

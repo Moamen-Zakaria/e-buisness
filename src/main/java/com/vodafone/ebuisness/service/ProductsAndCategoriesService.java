@@ -1,9 +1,12 @@
 package com.vodafone.ebuisness.service;
 
+import com.vodafone.ebuisness.exception.ImageDoesNotExistException;
+import com.vodafone.ebuisness.exception.NoRoomForImageOfProductException;
 import com.vodafone.ebuisness.exception.NoSuchCategoryException;
 import com.vodafone.ebuisness.exception.NoSuchProductException;
 import com.vodafone.ebuisness.model.main.Category;
 import com.vodafone.ebuisness.model.main.Product;
+import org.bson.types.Binary;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
@@ -32,5 +35,13 @@ public interface ProductsAndCategoriesService {
     void deleteProduct(ObjectId _id);
 
     void deleteCategory(ObjectId _id);
+
+    void addImageToProduct(byte[] image, String productId) throws NoSuchProductException, NoRoomForImageOfProductException;
+
+    void clearImagesFromProduct(String productId) throws NoSuchProductException;
+
+    void removeImageFromProduct(Integer index, String productId) throws NoSuchProductException, ImageDoesNotExistException;
+
+    List<Binary> getImagesOfProduct(String productId) throws NoSuchProductException;
 
 }

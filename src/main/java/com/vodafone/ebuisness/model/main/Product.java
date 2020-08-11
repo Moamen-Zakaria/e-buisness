@@ -2,6 +2,7 @@ package com.vodafone.ebuisness.model.main;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import org.bson.types.Binary;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
@@ -15,7 +16,7 @@ import java.util.List;
 public class Product {
 
     @Id
-    @JsonSerialize(using= ToStringSerializer.class)
+    @JsonSerialize(using = ToStringSerializer.class)
     private ObjectId objectId;
 
     @NotBlank
@@ -26,6 +27,8 @@ public class Product {
 
     @Min(value = 1, message = "Error: Price can't be below 1")
     private Double price;
+
+    private List<Binary> images;
 
     @DBRef
     private List<Category> categories;
@@ -87,5 +90,13 @@ public class Product {
 
     public void setCategories(List<Category> categories) {
         this.categories = categories;
+    }
+
+    public List<Binary> getImages() {
+        return images;
+    }
+
+    public void setImages(List<Binary> images) {
+        this.images = images;
     }
 }

@@ -1,5 +1,7 @@
 package com.vodafone.ebuisness.service.impl;
 
+import com.vodafone.ebuisness.exception.ImageDoesNotExistException;
+import com.vodafone.ebuisness.exception.NoRoomForImageOfProductException;
 import com.vodafone.ebuisness.exception.NoSuchCategoryException;
 import com.vodafone.ebuisness.exception.NoSuchProductException;
 import com.vodafone.ebuisness.model.main.Category;
@@ -8,10 +10,10 @@ import com.vodafone.ebuisness.repository.CategoryRepository;
 import com.vodafone.ebuisness.repository.ProductRepository;
 import com.vodafone.ebuisness.service.ProductsAndCategoriesService;
 
+import org.bson.types.Binary;
 import org.bson.types.ObjectId;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -135,6 +137,53 @@ public class ProductsAndCategoriesServiceImpl implements ProductsAndCategoriesSe
 
         categoryRepository.deleteById(_id);
 
+    }
+
+    @Override
+    public void addImageToProduct(byte[] image, String productId)
+            throws NoSuchProductException, NoRoomForImageOfProductException {
+
+        var product = findProductById(new ObjectId(productId));
+        if (product.getImages() == null) {
+            product.setImages(new ArrayList<>());
+        }
+        if (product.getImages().size() == 6) {
+            throw new NoRoomForImageOfProductException();
+        }
+        product.getImages().add(new Binary(image));
+        saveOrUpdateProduct(product);
+
+    }
+
+    @Override
+    public void clearImagesFromProduct(String productId) throws NoSuchProductException {
+
+        var product = findProductById(new ObjectId(productId));
+        if (product.getImages() == null) {
+            return;
+        }
+        product.getImages().clear();
+        saveOrUpdateProduct(product);
+
+    }
+
+    @Override
+    public void removeImageFromProduct(Integer index, String productId)
+            throws NoSuchProductException, ImageDoesNotExistException {
+
+        --index;
+        var product = findProductById(new ObjectId(productId));
+        if (product.getImages() == null || product.getImages().size() < index + 1) {
+            throw new ImageDoesNotExistException();
+        }
+        product.getImages().remove(index.intValue());
+        saveOrUpdateProduct(product);
+
+    }
+
+    @Override
+    public List<Binary> getImagesOfProduct(String productId) throws NoSuchProductException {
+        return findProductById(new ObjectId(productId)).getImages();
     }
 
 }
