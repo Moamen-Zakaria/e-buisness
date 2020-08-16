@@ -2,6 +2,6 @@ package com.vodafone.ebuisness.configuration;
 
 public enum PropertiesMapping {
 
-    MARKETING_MAIL
+    MARKETING_MAIL , PAYPAL_SANDBOX
 
 }

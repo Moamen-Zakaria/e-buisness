@@ -19,6 +19,8 @@ public class PropertiesLoader {
         propertiesMap = new HashMap<>();
         propertiesMap.put(PropertiesMapping.MARKETING_MAIL
                 , "src/main/resources/Mail profiles/Marketing.properties");
+        propertiesMap.put(PropertiesMapping.PAYPAL_SANDBOX
+                , "src/main/resources/Paypal details/PayPalSandbox.properties");
 
     }
 
@@ -29,7 +31,7 @@ public class PropertiesLoader {
         FileReader reader = null;
 
         try {
-            reader = new FileReader((String) propertiesMap.get(PropertiesMapping.MARKETING_MAIL));
+            reader = new FileReader((String) propertiesMap.get(prop));
             properties.load(reader);
 
         } catch (IOException e) {

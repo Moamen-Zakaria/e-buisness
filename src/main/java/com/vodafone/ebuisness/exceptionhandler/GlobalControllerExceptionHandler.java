@@ -73,4 +73,9 @@ class GlobalControllerExceptionHandler extends ResponseEntityExceptionHandler {
     public void handleIllegalStateException(WebRequest request) {
     }
 
+    @ResponseStatus(value = HttpStatus.CONFLICT, reason = "No items to checkout exception!")
+    @ExceptionHandler(EmptyCartException.class)
+    public void handleEmptyCartException(WebRequest request) {
+    }
+
 }

@@ -44,9 +44,6 @@ public class Account {
 
     private Set<String> roles;
 
-//    @DBRef
-    private List<PaymentMean> paymentMeans;
-
     public Account() {
     }
 
@@ -115,11 +112,4 @@ public class Account {
         this.roles = roles;
     }
 
-    public List<PaymentMean> getPaymentMeans() {
-        return paymentMeans;
-    }
-
-    public void setPaymentMeans(List<PaymentMean> paymentMeans) {
-        this.paymentMeans = paymentMeans;
-    }
 }

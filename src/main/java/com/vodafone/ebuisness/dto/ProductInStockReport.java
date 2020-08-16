@@ -1,7 +1,10 @@
 package com.vodafone.ebuisness.dto;
 
+import org.bson.types.ObjectId;
+
 public class ProductInStockReport {
 
+    private ObjectId objectId;
     private String productName;
     private Integer availableQuantity;
     private Integer requiredQuantity;
@@ -56,5 +59,13 @@ public class ProductInStockReport {
     public void setRequiredQuantity(Integer requiredQuantity) {
         this.requiredQuantity = requiredQuantity;
         setStockStatus();
+    }
+
+    public ObjectId getObjectId() {
+        return objectId;
+    }
+
+    public void setObjectId(ObjectId objectId) {
+        this.objectId = objectId;
     }
 }

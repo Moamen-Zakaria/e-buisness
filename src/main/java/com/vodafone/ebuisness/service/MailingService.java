@@ -10,6 +10,8 @@ public interface MailingService {
 
     void sendRegistrationMail(String email, String name) throws MessagingException;
 
+    void sendInvoiceMail(Account account, String link) throws MessagingException;
+
     void sendProductNewsToEmail(String email, Product product, String name) throws MessagingException;
 
     void sendProductNews(Product product) throws NoSuchProductException;

@@ -1,12 +1,10 @@
 package com.vodafone.ebuisness.service;
 
 import com.vodafone.ebuisness.dto.ProductInStockReport;
-import com.vodafone.ebuisness.exception.EmailDoesNotExistException;
-import com.vodafone.ebuisness.exception.ItemNotInCartException;
-import com.vodafone.ebuisness.exception.ItemOutOfStockException;
-import com.vodafone.ebuisness.exception.NoSuchProductException;
+import com.vodafone.ebuisness.exception.*;
 import com.vodafone.ebuisness.model.auxiliary.ProductInCart;
 
+import javax.mail.MessagingException;
 import java.util.List;
 
 public interface CartService {
@@ -27,6 +25,7 @@ public interface CartService {
 
     Double calculateTotalPriceOfItemsInCart(String email) throws EmailDoesNotExistException;
 
-    void checkoutCart(String email);
+    void checkoutCart(String email) throws EmailDoesNotExistException, EmptyCartException, MessagingException, ItemOutOfStockException;
 
+    void cancelInvoice(String invoiceId);
 }

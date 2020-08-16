@@ -1,21 +1,25 @@
 package com.vodafone.ebuisness.service.impl;
 
+import com.vodafone.ebuisness.configuration.InvoiceStatus;
 import com.vodafone.ebuisness.dto.ProductInStockReport;
-import com.vodafone.ebuisness.exception.EmailDoesNotExistException;
-import com.vodafone.ebuisness.exception.ItemNotInCartException;
-import com.vodafone.ebuisness.exception.ItemOutOfStockException;
-import com.vodafone.ebuisness.exception.NoSuchProductException;
+import com.vodafone.ebuisness.exception.*;
 import com.vodafone.ebuisness.model.auxiliary.ProductInCart;
+import com.vodafone.ebuisness.model.main.Account;
+import com.vodafone.ebuisness.model.main.Invoice;
 import com.vodafone.ebuisness.model.main.ProductsInDeal;
+import com.vodafone.ebuisness.repository.PayPalRepository;
 import com.vodafone.ebuisness.repository.ProductsInDealRepository;
 import com.vodafone.ebuisness.service.AuthService;
 import com.vodafone.ebuisness.service.CartService;
+import com.vodafone.ebuisness.service.MailingService;
 import com.vodafone.ebuisness.service.ProductsAndCategoriesService;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import javax.mail.MessagingException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,16 +27,22 @@ import java.util.List;
 public class CartServiceImpl implements CartService {
 
     @Autowired
-    ProductsInDealRepository productsInDealRepository;
+    private ProductsInDealRepository productsInDealRepository;
 
     @Autowired
-    AuthService authService;
+    private AuthService authService;
 
     @Autowired
-    ProductsAndCategoriesService productsAndCategoriesService;
+    private MailingService mailingService;
 
     @Autowired
-    ApplicationContext applicationContext;
+    private ProductsAndCategoriesService productsAndCategoriesService;
+
+    @Autowired
+    private ApplicationContext applicationContext;
+
+    @Autowired
+    private PayPalRepository payPalRepository;
 
     @Override
     public void addProductToCart(String email, String itemId, Integer quantity)
@@ -152,6 +162,7 @@ public class CartServiceImpl implements CartService {
                     = new ProductInStockReport(product.getName()
                     , product.getQuantity()
                     , productInCart.getRequiredQuantity());
+            productInStockReport.setObjectId(productInCart.getProduct().getObjectId());
 
             productInStockReportList.add(productInStockReport);
         }
@@ -188,6 +199,7 @@ public class CartServiceImpl implements CartService {
                 .findFirst();
         var productInCart = optionalProductInCart.get();
         var productInStockReport = new ProductInStockReport(product.getName(), product.getQuantity(), productInCart.getRequiredQuantity());
+        productInStockReport.setObjectId(product.getObjectId());
         return productInStockReport;
     }
 
@@ -204,7 +216,63 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public void checkoutCart(String email) {
+    @Transactional
+    public void checkoutCart(String email)
+            throws EmailDoesNotExistException, EmptyCartException,
+            MessagingException, ItemOutOfStockException {
+
+        //validating that the email is registered
+        Account account = authService.findAccountByEmail(email);
+        ProductsInDeal productsInDeal
+                = productsInDealRepository.findByAccount_IdAndPaymentIsNull(account.getObjectId());
+
+        if (productsInDeal == null) {
+            throw new EmptyCartException();
+        }
+        var listOfReports = areProductsInCartInStock(email);
+
+        //validating that items are in stock
+        for (ProductInStockReport report : listOfReports) {
+            if (!report.getInStock()) {
+                throw new ItemOutOfStockException();
+            }
+        }
+
+        //updating database products' quantities
+        listOfReports.stream().parallel().forEach(report -> {
+
+            try {
+                var product = productsAndCategoriesService.findProductById(report.getObjectId());
+                product.setQuantity(product.getQuantity() - report.getRequiredQuantity());
+                productsAndCategoriesService.saveOrUpdateProduct(product);
+            } catch (NoSuchProductException e) {
+                e.printStackTrace();
+            }
+
+        });
+
+        String invoiceId = payPalRepository.createDraftInvoice(productsInDeal, account);
+        var link = payPalRepository.sendInvoice(invoiceId);
+        new Thread(() -> {
+            try {
+                mailingService.sendInvoiceMail(account, link);
+            } catch (MessagingException e) {
+                e.printStackTrace();
+            }
+        }).start();
+        productsInDeal.setInvoice(new Invoice(invoiceId, InvoiceStatus.SENT));
+        productsInDealRepository.save(productsInDeal);
 
     }
+
+    @Override
+    @Transactional
+    public void cancelInvoice(String invoiceId) {
+        var productsInDeal =
+                productsInDealRepository.findProductsInDealByInvoiceId(invoiceId);
+        payPalRepository.cancelInvoice(invoiceId);
+        productsInDeal.getInvoice().setStatus(InvoiceStatus.CANCELLED);
+        productsInDealRepository.save(productsInDeal);
+    }
+
 }

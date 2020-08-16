@@ -57,6 +57,32 @@ public class MailingServiceImpl implements MailingService {
     }
 
     @Override
+    public void sendInvoiceMail(Account account, String link) throws MessagingException {
+
+        if (account == null ) {
+            throw new IllegalArgumentException();
+        }
+
+        if (link == null || link.trim().equals("")) {
+            throw new IllegalArgumentException();
+        }
+
+        Properties properties
+                = propertiesLoader.loadProperties(PropertiesMapping.MARKETING_MAIL);
+
+        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+
+        mimeMessage.setFrom(properties.getProperty("mail.email"));
+        mimeMessage.setSubject("invoice mail");
+        mimeMessage.setRecipient(Message.RecipientType.TO, new InternetAddress(account.getEmail()));
+        mimeMessage.setText("Dear " + account.getPersonName() + ",\n\nThanks for buying our product, " +
+                "please follow this link , " + link +", for your bill details.\n\n" +
+                "Sincerely\nEBuisness team");
+        javaMailSender.send(mimeMessage);
+
+    }
+
+    @Override
     public void sendProductNewsToEmail(String email, Product product, String name) throws MessagingException {
 
         if (name == null || name.trim().equals("")) {

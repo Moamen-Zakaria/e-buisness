@@ -22,16 +22,15 @@ public class ProductsInDeal {
     @DBRef
     private Account account;
 
-    @DBRef
-    private Payment payment;
+    private Invoice invoice;
 
     public ProductsInDeal() {
     }
 
-    public ProductsInDeal(List<ProductInCart> productInCartList, Account account, Payment payment) {
+    public ProductsInDeal(List<ProductInCart> productInCartList, Account account, Invoice invoice) {
         this.productInCartList = productInCartList;
         this.account = account;
-        this.payment = payment;
+        this.invoice = invoice;
     }
 
     public ObjectId getObjectId() {
@@ -58,11 +57,11 @@ public class ProductsInDeal {
         this.account = account;
     }
 
-    public Payment getPayment() {
-        return payment;
+    public Invoice getInvoice() {
+        return invoice;
     }
 
-    public void setPayment(Payment payment) {
-        this.payment = payment;
+    public void setInvoice(Invoice invoice) {
+        this.invoice = invoice;
     }
 }

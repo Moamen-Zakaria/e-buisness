@@ -3,6 +3,7 @@ package com.vodafone.ebuisness.controller.admin;
 import com.vodafone.ebuisness.exception.*;
 import com.vodafone.ebuisness.model.main.Category;
 import com.vodafone.ebuisness.model.main.Product;
+import com.vodafone.ebuisness.service.CartService;
 import com.vodafone.ebuisness.service.MailingService;
 import com.vodafone.ebuisness.service.ProductsAndCategoriesService;
 import com.vodafone.ebuisness.util.ImageValidator;
@@ -22,7 +23,6 @@ import javax.validation.constraints.NotBlank;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -35,6 +35,9 @@ public class AdminProductManagementController {
 
     @Autowired
     private MailingService mailingService;
+
+    @Autowired
+    private CartService cartService;
 
     @PostMapping({"/products/add", "/products/update"})
     public ResponseEntity addProduct(@Valid Product product) {
@@ -191,6 +194,12 @@ public class AdminProductManagementController {
         zipOut.finish();
         zipOut.close();
         response.setStatus(HttpServletResponse.SC_OK);
+    }
+
+    @DeleteMapping("/products/invoice/remove/")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteInvoice(@RequestParam @NotBlank String invoiceId) {
+        cartService.cancelInvoice(invoiceId);
     }
 
 }
