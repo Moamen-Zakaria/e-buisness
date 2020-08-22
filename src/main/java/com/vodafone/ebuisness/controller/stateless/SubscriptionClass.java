@@ -1,4 +1,4 @@
-package com.vodafone.ebuisness.controller.sharedroles;
+package com.vodafone.ebuisness.controller.stateless;
 
 import com.vodafone.ebuisness.exception.EmailDoesNotExistException;
 import com.vodafone.ebuisness.exception.NoSuchCategoryException;

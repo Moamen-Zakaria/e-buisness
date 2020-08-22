@@ -3,11 +3,15 @@ package com.vodafone.ebuisness.service.impl;
 import com.vodafone.ebuisness.exception.EmailAlreadyExistException;
 import com.vodafone.ebuisness.exception.EmailDoesNotExistException;
 import com.vodafone.ebuisness.exception.LoginFailException;
+import com.vodafone.ebuisness.model.auxiliary.AccountUserDetailsWrapperAdapter;
 import com.vodafone.ebuisness.model.main.Account;
 import com.vodafone.ebuisness.repository.AccountRepository;
 import com.vodafone.ebuisness.service.AuthService;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -15,7 +19,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service
-public class AuthServiceImpl implements AuthService {
+public class AuthServiceImpl implements AuthService, UserDetailsService {
 
     @Autowired
     private AccountRepository accountRepository;
@@ -187,4 +191,16 @@ public class AuthServiceImpl implements AuthService {
 
     }
 
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        var existingAccount = accountRepository.findByEmail(email);
+        if (existingAccount == null) {
+
+            var usernameException = new UsernameNotFoundException("No such email!");
+            usernameException.initCause(new EmailDoesNotExistException());
+            throw usernameException;
+
+        }
+        return new AccountUserDetailsWrapperAdapter(existingAccount);
+    }
 }

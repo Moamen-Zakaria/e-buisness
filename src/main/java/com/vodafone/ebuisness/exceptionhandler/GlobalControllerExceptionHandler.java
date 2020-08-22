@@ -78,4 +78,9 @@ class GlobalControllerExceptionHandler extends ResponseEntityExceptionHandler {
     public void handleEmptyCartException(WebRequest request) {
     }
 
+    @ResponseStatus(value = HttpStatus.UNAUTHORIZED, reason = "Invalid JWT token")
+    @ExceptionHandler(InvalidTokenAuthenticationException.class)
+    public void handleInvalidTokenAuthenticationException(WebRequest request) {
+    }
+
 }
