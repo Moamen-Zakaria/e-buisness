@@ -1,7 +1,10 @@
 package com.vodafone.ebuisness.controller.stateless;
 
+import com.vodafone.ebuisness.dto.security.LoginResponse;
 import com.vodafone.ebuisness.exception.EmailAlreadyExistException;
 import com.vodafone.ebuisness.exception.LoginFailException;
+import com.vodafone.ebuisness.exception.NoAuthenticationFoundException;
+import com.vodafone.ebuisness.exception.RefreshTokenNotValidException;
 import com.vodafone.ebuisness.model.main.Account;
 import com.vodafone.ebuisness.security.util.impl.JwtTokenProviderImpl;
 import com.vodafone.ebuisness.service.AuthService;
@@ -13,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.mail.MessagingException;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
@@ -48,14 +52,25 @@ public class AccountsController {
 
     @PostMapping("/login")
     @ResponseStatus(value = HttpStatus.OK)
-    public String login(
-            @NotBlank(message = "Invalid account or password") String email,
-            @NotBlank(message = "Invalid account or password") String password)
+    public LoginResponse login(
+            @RequestParam @NotBlank(message = "Invalid account or password") String email,
+            @RequestParam @NotBlank(message = "Invalid account or password") String password)
             throws LoginFailException {
         var account = authService.login(email, password);
         var roles = account.getRoles() == null ? new ArrayList<String>() : account.getRoles();
         var rolesList = roles.stream().collect(Collectors.toList());
-        return jwtTokenProvider.createToken(account.getEmail(), rolesList);
+        var accessToken = jwtTokenProvider.createAccessToken(account.getEmail(), rolesList);
+        var refreshToken = jwtTokenProvider.createNewRefreshToken(account.getEmail());
+        return new LoginResponse(accessToken, refreshToken, "bearer");
+    }
+
+    @PostMapping("/refresh/token")
+    @ResponseStatus(value = HttpStatus.OK)
+    public String refresh(
+            @RequestParam @NotNull @NotBlank(message = "No valid email provided") String email,
+            @RequestParam @NotNull @NotBlank(message = "No valid token provided") String refreshToken)
+            throws RefreshTokenNotValidException {
+        return jwtTokenProvider.refreshToken(email, refreshToken);
     }
 
 }

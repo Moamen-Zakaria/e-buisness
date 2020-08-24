@@ -1,7 +1,10 @@
 package com.vodafone.ebuisness.controller.sharedroles;
 
 import com.vodafone.ebuisness.exception.EmailDoesNotExistException;
+import com.vodafone.ebuisness.exception.NoAuthenticationFoundException;
+import com.vodafone.ebuisness.exception.RefreshTokenNotValidException;
 import com.vodafone.ebuisness.model.main.Account;
+import com.vodafone.ebuisness.security.util.impl.JwtTokenProviderImpl;
 import com.vodafone.ebuisness.service.AuthService;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,10 +15,14 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 @RestController
 @RequestMapping("/shared/accounts")
 public class AccountManagementController {
+
+    @Autowired
+    private JwtTokenProviderImpl jwtTokenProvider;
 
     @Autowired
     private AuthService authService;
@@ -55,6 +62,15 @@ public class AccountManagementController {
     @ResponseStatus(value = HttpStatus.ACCEPTED)
     public Account getAccountByEmail(@PathVariable String email) throws EmailDoesNotExistException {
         return authService.findAccountByEmail(email);
+    }
+
+    @PostMapping("/logout")
+    @ResponseStatus(value = HttpStatus.OK)
+    public void logout(
+            @RequestParam @NotNull @NotBlank(message = "No valid email provided") String email,
+            @RequestParam @NotNull @NotBlank(message = "No valid token provided") String refreshToken)
+            throws RefreshTokenNotValidException, NoAuthenticationFoundException {
+        jwtTokenProvider.logout(email, refreshToken);
     }
 
 }

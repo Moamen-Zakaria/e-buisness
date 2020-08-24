@@ -34,7 +34,6 @@ public class ProductsController {
 
     @GetMapping("/{id}")
     public Product getProductById(@PathVariable("id") String id) throws NoSuchProductException {
-        System.out.println(id);
         return productsAndCategoriesService.findProductById(new ObjectId(id));
     }
 

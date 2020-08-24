@@ -83,4 +83,14 @@ class GlobalControllerExceptionHandler extends ResponseEntityExceptionHandler {
     public void handleInvalidTokenAuthenticationException(WebRequest request) {
     }
 
+    @ResponseStatus(value = HttpStatus.UNAUTHORIZED, reason = "Refresh Token Not Valid!")
+    @ExceptionHandler(RefreshTokenNotValidException.class)
+    public void handleRefreshTokenNotValidException(WebRequest request) {
+    }
+
+    @ResponseStatus(value = HttpStatus.UNAUTHORIZED, reason = "Account not logged in!")
+    @ExceptionHandler(NoAuthenticationFoundException.class)
+    public void handleNoAuthenticationFoundException(WebRequest request) {
+    }
+
 }

@@ -176,6 +176,9 @@ public class CartServiceImpl implements CartService {
         var account = authService.findAccountByEmail(email);
         var accountId = account.getObjectId();
         var productInDeal = productsInDealRepository.findByAccount_IdAndPaymentIsNull(accountId);
+        if (productInDeal == null) {
+            return false;
+        }
         if (productInDeal.getProductInCartList() != null) {
             var optionalId = productInDeal.getProductInCartList().stream().parallel()
                     .filter(pid -> pid.getProduct().getObjectId().equals(new ObjectId(itemId))).findFirst();

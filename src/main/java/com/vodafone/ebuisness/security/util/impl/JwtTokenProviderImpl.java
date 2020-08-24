@@ -1,24 +1,31 @@
 package com.vodafone.ebuisness.security.util.impl;
 
 
+import com.vodafone.ebuisness.exception.NoAuthenticationFoundException;
+import com.vodafone.ebuisness.exception.RefreshTokenNotValidException;
 import com.vodafone.ebuisness.security.util.JwtTokenProvider;
 import io.jsonwebtoken.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Scope;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
-import java.util.Base64;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
+@Scope("singleton")
 public class JwtTokenProviderImpl implements JwtTokenProvider {
+
+    private Map<String, String> tokensCache = new HashMap<>();
+
     //    @Value("${security.jwt.token.secret-key:secret}")
     private String secretKey = "secret";
     //    @Value("${security.jwt.token.expire-length:3600000}")
@@ -34,7 +41,7 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
     }
 
     @Override
-    public String createToken(String username, List<String> roles) {
+    public String createAccessToken(String username, List<String> roles) {
         Claims claims = Jwts.claims().setSubject(username);
         claims.put("roles", roles);
         Date now = new Date();
@@ -79,4 +86,46 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
             return false;
         }
     }
+
+    @Override
+    public String refreshToken(String email, String refreshToken)
+            throws RefreshTokenNotValidException {
+
+        String cachedRefreshToken = tokensCache.get(email);
+
+        if (cachedRefreshToken == null || !cachedRefreshToken.equals(refreshToken)) {
+            throw new RefreshTokenNotValidException();
+        }
+
+        UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+        var listOfRoles =
+                userDetails.getAuthorities()
+                        .stream().map(o -> o.getAuthority()).collect(Collectors.toList());
+        return createAccessToken(userDetails.getUsername(), listOfRoles);
+    }
+
+    @Override
+    public String createNewRefreshToken(String email) {
+        String base = "email:" + new Date().getTime();
+        var refreshToken = new BCryptPasswordEncoder().encode(base);
+        tokensCache.put(email, refreshToken);
+        return refreshToken;
+    }
+
+
+    @Override
+    public void logout(String email, String refreshToken)
+            throws NoAuthenticationFoundException, RefreshTokenNotValidException {
+
+        if (!tokensCache.containsKey(email)) {
+            throw new NoAuthenticationFoundException();
+        }
+        if (!tokensCache.containsValue(refreshToken)) {
+            throw new RefreshTokenNotValidException();
+        }
+
+        tokensCache.remove(email);
+
+    }
+
 }
