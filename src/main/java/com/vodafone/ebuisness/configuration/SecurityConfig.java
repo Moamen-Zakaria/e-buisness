@@ -9,10 +9,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.core.GrantedAuthorityDefaults;
 import org.springframework.security.config.http.SessionCreationPolicy;
 
 @Configuration
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
+
+    private final String rolePrefix = "ROLE_";
 
     @Autowired
     private JwtTokenProviderImpl jwtTokenProvider;
@@ -28,6 +31,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         return super.authenticationManagerBean();
     }
 
+    @Bean
+    GrantedAuthorityDefaults grantedAuthorityDefaults() {
+        return new GrantedAuthorityDefaults("");
+    }
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
@@ -36,21 +44,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-//                .antMatchers("/admin/retail/**").hasRole(AccountRole.ADMIN)
 
-                .antMatchers("/admin/retail/**").authenticated()
-                .antMatchers("/admin/auth/**").authenticated()
+                .antMatchers("/admin/retail/**").hasRole(AccountRole.ADMIN)
+                .antMatchers("/admin/auth/**").hasRole(AccountRole.ADMIN)
 
-                .antMatchers("/customer/carts/**").authenticated()
+                .antMatchers("/customer/carts/**").hasRole(AccountRole.USER)
 
-                .antMatchers("/shared/accounts/**").authenticated()
-                .antMatchers("/shared/carts/**").authenticated()
+                .antMatchers("/shared/accounts/**").hasAnyRole(AccountRole.ADMIN , AccountRole.USER)
+                .antMatchers("/shared/carts/**").hasAnyRole(AccountRole.ADMIN , AccountRole.USER)
 
-                .antMatchers("/auth/**").permitAll()
-//                .antMatchers(HttpMethod.GET, "/admin/retail/**").permitAll()
-//                .antMatchers(HttpMethod.DELETE, "/admin/retail/**").hasRole("ADMIN")
-//                .antMatchers(HttpMethod.GET, "/v1/vehicles/**").permitAll()
-//                .anyRequest().authenticated()
+                .anyRequest().permitAll()
+
                 .and()
                 .apply(new JwtFilterConfigurer(getMyUsernamePasswordAuthenticationFilter()));
     }
