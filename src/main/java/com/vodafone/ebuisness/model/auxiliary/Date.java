@@ -9,7 +9,7 @@ public class Date {
     public Date() {
     }
 
-    public Date(int year, int month, int day) {
+    public Date(int day, int month, int year) {
         this.year = year;
         this.month = month;
         this.day = day;
