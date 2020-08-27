@@ -1,5 +1,6 @@
 package com.vodafone.ebuisness.model.main;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import org.bson.types.ObjectId;
@@ -15,6 +16,7 @@ public class Category {
 
     @Id
     @JsonSerialize(using= ToStringSerializer.class)
+    @JsonProperty("object_id")
     private ObjectId objectId;
 
     @NotBlank

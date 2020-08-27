@@ -7,7 +7,7 @@ import com.vodafone.ebuisness.model.auxiliary.ProductInCart;
 import com.vodafone.ebuisness.model.main.Account;
 import com.vodafone.ebuisness.model.main.Invoice;
 import com.vodafone.ebuisness.model.main.ProductsInDeal;
-import com.vodafone.ebuisness.repository.PayPalRepository;
+import com.vodafone.ebuisness.service.PayPalService;
 import com.vodafone.ebuisness.repository.ProductsInDealRepository;
 import com.vodafone.ebuisness.service.AuthService;
 import com.vodafone.ebuisness.service.CartService;
@@ -42,7 +42,7 @@ public class CartServiceImpl implements CartService {
     private ApplicationContext applicationContext;
 
     @Autowired
-    private PayPalRepository payPalRepository;
+    private PayPalService payPalService;
 
     @Override
     public void addProductToCart(String email, String itemId, Integer quantity)
@@ -222,7 +222,7 @@ public class CartServiceImpl implements CartService {
     @Transactional
     public void checkoutCart(String email)
             throws EmailDoesNotExistException, EmptyCartException,
-            MessagingException, ItemOutOfStockException {
+            ItemOutOfStockException, ConnectionErrorException {
 
         //validating that the email is registered
         Account account = authService.findAccountByEmail(email);
@@ -254,8 +254,8 @@ public class CartServiceImpl implements CartService {
 
         });
 
-        String invoiceId = payPalRepository.createDraftInvoice(productsInDeal, account);
-        var link = payPalRepository.sendInvoice(invoiceId);
+        String invoiceId = payPalService.createDraftInvoice(productsInDeal, account);
+        var link = payPalService.sendInvoice(invoiceId);
         new Thread(() -> {
             try {
                 mailingService.sendInvoiceMail(account, link);
@@ -270,10 +270,10 @@ public class CartServiceImpl implements CartService {
 
     @Override
     @Transactional
-    public void cancelInvoice(String invoiceId) {
+    public void cancelInvoice(String invoiceId) throws ConnectionErrorException {
         var productsInDeal =
                 productsInDealRepository.findProductsInDealByInvoiceId(invoiceId);
-        payPalRepository.cancelInvoice(invoiceId);
+        payPalService.cancelInvoice(invoiceId);
         productsInDeal.getInvoice().setStatus(InvoiceStatus.CANCELLED);
         productsInDealRepository.save(productsInDeal);
     }

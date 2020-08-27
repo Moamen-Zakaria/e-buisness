@@ -25,7 +25,7 @@ public interface CartService {
 
     Double calculateTotalPriceOfItemsInCart(String email) throws EmailDoesNotExistException;
 
-    void checkoutCart(String email) throws EmailDoesNotExistException, EmptyCartException, MessagingException, ItemOutOfStockException;
+    void checkoutCart(String email) throws EmailDoesNotExistException, EmptyCartException, MessagingException, ItemOutOfStockException, ConnectionErrorException;
 
-    void cancelInvoice(String invoiceId);
+    void cancelInvoice(String invoiceId) throws ConnectionErrorException;
 }

@@ -171,7 +171,7 @@ public class AdminProductManagementController {
 
     @DeleteMapping("/products/invoice/remove/")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteInvoice(@RequestParam @NotBlank String invoiceId) {
+    public void deleteInvoice(@RequestParam @NotBlank String invoiceId) throws ConnectionErrorException {
         cartService.cancelInvoice(invoiceId);
     }
 

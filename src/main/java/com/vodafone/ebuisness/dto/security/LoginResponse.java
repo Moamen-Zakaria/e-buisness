@@ -4,13 +4,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class LoginResponse {
 
-    @JsonProperty("Access-Token")
+    @JsonProperty("access_token")
     private String accessToken;
 
-    @JsonProperty("Refresh-Token")
+    @JsonProperty("refresh_token")
     private String refreshToken;
 
-    @JsonProperty("Token-Type")
+    @JsonProperty("token_type")
     private String tokenType;
 
     public LoginResponse() {

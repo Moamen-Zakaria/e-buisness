@@ -1,6 +1,5 @@
 package com.vodafone.ebuisness.service.impl;
 
-import com.vodafone.ebuisness.configuration.PropertiesMapping;
 import com.vodafone.ebuisness.exception.EmailDoesNotExistException;
 import com.vodafone.ebuisness.exception.NoSuchProductException;
 import com.vodafone.ebuisness.model.auxiliary.PersonName;
@@ -9,8 +8,8 @@ import com.vodafone.ebuisness.model.main.Product;
 import com.vodafone.ebuisness.service.AuthService;
 import com.vodafone.ebuisness.service.MailingService;
 import com.vodafone.ebuisness.service.SubscriptionService;
-import com.vodafone.ebuisness.util.PropertiesLoader;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
@@ -18,16 +17,16 @@ import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import java.util.Properties;
 
 @Service
+@PropertySource("classpath:Mail profiles/Marketing-${spring.profiles.active}.properties")
 public class MailingServiceImpl implements MailingService {
 
     @Autowired
     JavaMailSender javaMailSender;
 
-    @Autowired
-    PropertiesLoader propertiesLoader;
+//    @Autowired
+//    PropertiesLoader propertiesLoader;
 
     @Autowired
     AuthService authService;
@@ -42,12 +41,8 @@ public class MailingServiceImpl implements MailingService {
             name = "Sir/Madame";
         }
 
-        Properties properties
-                = propertiesLoader.loadProperties(PropertiesMapping.MARKETING_MAIL);
-
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
 
-        mimeMessage.setFrom(properties.getProperty("mail.email"));
         mimeMessage.setSubject("ebuisness registeration mail");
         mimeMessage.setRecipient(Message.RecipientType.TO, new InternetAddress(email));
         mimeMessage.setText("Dear " + name + ",\n\nYour email has been successfully registered!\n\n" +
@@ -59,7 +54,7 @@ public class MailingServiceImpl implements MailingService {
     @Override
     public void sendInvoiceMail(Account account, String link) throws MessagingException {
 
-        if (account == null ) {
+        if (account == null) {
             throw new IllegalArgumentException();
         }
 
@@ -67,16 +62,12 @@ public class MailingServiceImpl implements MailingService {
             throw new IllegalArgumentException();
         }
 
-        Properties properties
-                = propertiesLoader.loadProperties(PropertiesMapping.MARKETING_MAIL);
-
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
 
-        mimeMessage.setFrom(properties.getProperty("mail.email"));
         mimeMessage.setSubject("invoice mail");
         mimeMessage.setRecipient(Message.RecipientType.TO, new InternetAddress(account.getEmail()));
         mimeMessage.setText("Dear " + account.getPersonName() + ",\n\nThanks for buying our product, " +
-                "please follow this link , " + link +", for your bill details.\n\n" +
+                "please follow this link , " + link + ", for your bill details.\n\n" +
                 "Sincerely\nEBuisness team");
         javaMailSender.send(mimeMessage);
 
@@ -88,12 +79,9 @@ public class MailingServiceImpl implements MailingService {
         if (name == null || name.trim().equals("")) {
             name = "Sir/Madame";
         }
-        Properties properties
-                = propertiesLoader.loadProperties(PropertiesMapping.MARKETING_MAIL);
 
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
 
-        mimeMessage.setFrom(properties.getProperty("mail.email"));
         mimeMessage.setSubject("ebuisness registeration mail");
         mimeMessage.setRecipient(Message.RecipientType.TO, new InternetAddress(email));
         mimeMessage.setText("Dear " + name + ",\n\nWe are pleased to inform you that we got a new " +
@@ -144,3 +132,4 @@ public class MailingServiceImpl implements MailingService {
 
 
 }
+

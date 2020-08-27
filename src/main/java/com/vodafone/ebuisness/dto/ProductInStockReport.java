@@ -1,13 +1,22 @@
 package com.vodafone.ebuisness.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.bson.types.ObjectId;
 
 public class ProductInStockReport {
 
+    @JsonProperty("object_id")
     private ObjectId objectId;
+
+    @JsonProperty("product_name")
     private String productName;
+
+    @JsonProperty("available_quantity")
     private Integer availableQuantity;
+
+    @JsonProperty("required_quantity")
     private Integer requiredQuantity;
+
     private Boolean isInStock;
 
     public ProductInStockReport(String productName, Integer availableQuantity, Integer requiredQuantity) {
@@ -31,6 +40,7 @@ public class ProductInStockReport {
         isInStock = availableQuantity >= requiredQuantity;
     }
 
+    @JsonProperty("in_stock")
     public Boolean getInStock() {
         return isInStock;
     }

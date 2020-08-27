@@ -7,11 +7,10 @@ import com.vodafone.ebuisness.model.main.Account;
 import com.vodafone.ebuisness.model.main.Category;
 import com.vodafone.ebuisness.model.main.Product;
 import com.vodafone.ebuisness.model.main.ProductsInDeal;
-import com.vodafone.ebuisness.repository.PayPalRepository;
-import com.vodafone.ebuisness.repository.impl.PayPalRepositoryImpl;
-import com.vodafone.ebuisness.util.PropertiesLoader;
+import com.vodafone.ebuisness.service.PayPalService;
+import com.vodafone.ebuisness.service.impl.PayPalServiceImpl;
 import org.bson.types.ObjectId;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.*;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -24,10 +23,66 @@ import java.util.ArrayList;
 import java.util.Properties;
 
 @Configuration
+@PropertySource("classpath:Paypal details/PayPal-${spring.profiles.active}.properties")
+@PropertySource("classpath:Mail profiles/Marketing-${spring.profiles.active}.properties")
+@PropertySource("classpath:Database/Database-${spring.profiles.active}.properties")
 public class ContextConfiguration {
 
-    @Autowired
-    private PropertiesLoader propertiesLoader;
+    //email properties
+    @Value("${mail.host}")
+    private String host;
+
+    @Value("${mail.port}")
+    private Integer port;
+
+    @Value("${mail.email}")
+    private String email;
+
+    @Value("${mail.password}")
+    private String password;
+
+    @Value("${mail.transport.protocol}")
+    private String protocol;
+
+    @Value("${mail.smtp.ssl.enable}")
+    private Boolean isSSLEnabled;
+
+    @Value("${mail.properties.mail.smtp.auth}")
+    private Boolean isAuthEnabled;
+
+    @Value("${mail.properties.mail.smtp.starttls.enable}")
+    private Boolean isStarttlsEnabled;
+
+    @Value("${mail.debug}")
+    private Boolean isDebugEnabled;
+
+    //PayPal properties
+    @Value("${paypal.client.id}")
+    private String payPalId;
+
+    @Value("${paypal.client.secret}")
+    private String payPalSecret;
+
+    @Value("${paypal.api.url}")
+    private String payPalUrl;
+
+    @Value("${invoice.memo}")
+    private String payPalInvoiceMemo;
+
+    @Value("${invoice.note}")
+    private String payPalInvoiceNote;
+
+    @Value("${invoice.term}")
+    private String payPalInvoiceTerm;
+
+    @Value("${invoice.reference}")
+    private String payPalInvoiceReference;
+
+    @Value("${invoice.currency}")
+    private String payPalInvoiceCurrency;
+
+//    @Autowired
+//    private PropertiesLoader propertiesLoader;
 
     @Bean
     @Scope("prototype")
@@ -65,36 +120,38 @@ public class ContextConfiguration {
         return product;
     }
 
-    @Profile(SpringProfileNames.DEVELOPMENT)
     @Lazy
     @Bean("Market mail server")
     public JavaMailSender getJavaMailSender() {
-        Properties properties
-                = propertiesLoader.loadProperties(PropertiesMapping.MARKETING_MAIL);
 
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
 
-        mailSender.setHost(properties.getProperty("mail.host"));
-        mailSender.setPort(Integer.parseInt(properties.getProperty("mail.port")));
-        mailSender.setUsername(properties.getProperty("mail.email"));
-        mailSender.setPassword(properties.getProperty("mail.password"));
-        properties.put("mail.transport.protocol", "smtp");
-        properties.put("mail.smtp.auth", "true");
-        properties.put("mail.smtp.starttls.enable", "true");
-        properties.put("mail.debug", "true");
+        mailSender.setHost(host);
+        mailSender.setPort(port);
+        mailSender.setUsername(email);
+        mailSender.setPassword(password);
+
+        Properties properties = new Properties();
+
+        properties.put("mail.transport.protocol", protocol);
+        properties.put("mail.smtp.auth", isAuthEnabled);
+        properties.put("mail.smtp.starttls.enable", isStarttlsEnabled);
+        properties.put("mail.debug", isDebugEnabled);
         mailSender.setJavaMailProperties(properties);
 
         return mailSender;
     }
 
-    @Profile(SpringProfileNames.DEVELOPMENT)
     @Lazy
     @Bean("PayPal repository")
-    public PayPalRepository getPayPalRepository() {
+    public PayPalService getPayPalRepository() {
 
-        Properties properties
-                = propertiesLoader.loadProperties(PropertiesMapping.PAYPAL_SANDBOX);
-        return new PayPalRepositoryImpl(properties);
+        Properties properties = new Properties();
+        properties.put("paypal.client.id", payPalId);
+        properties.put("paypal.client.secret", payPalSecret);
+        properties.put("paypal.api.url", payPalUrl);
+
+        return new PayPalServiceImpl(properties);
 
     }
 
@@ -106,7 +163,6 @@ public class ContextConfiguration {
     }
 
 
-    @Profile(SpringProfileNames.DEVELOPMENT)
     @Bean
     @Scope("prototype")
     @Lazy
@@ -119,18 +175,17 @@ public class ContextConfiguration {
         return createInvoiceDraftRequest;
     }
 
-    @Profile(SpringProfileNames.DEVELOPMENT)
     @Scope("prototype")
     @Bean
     @Lazy
     public Detail getDetail() {
 
         Detail detail = new Detail();
-        detail.setCurrency_code("USD");
-        detail.setMemo("Ebuisness Memo!");
-        detail.setNote("Ebuisness note!");
-        detail.setTerm("Ebuisness term!");
-        detail.setReference("Ebuisness reference");
+        detail.setCurrency_code(payPalInvoiceCurrency);
+        detail.setMemo(payPalInvoiceMemo);
+        detail.setNote(payPalInvoiceNote);
+        detail.setTerm(payPalInvoiceTerm);
+        detail.setReference(payPalInvoiceReference);
         detail.setInvoice_date(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
         return detail;
 

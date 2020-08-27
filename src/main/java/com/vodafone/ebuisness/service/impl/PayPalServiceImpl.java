@@ -1,23 +1,21 @@
-package com.vodafone.ebuisness.repository.impl;
+package com.vodafone.ebuisness.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vodafone.ebuisness.dto.paypal.Token;
 import com.vodafone.ebuisness.dto.paypal.invoicedraftcreation.CreateInvoiceDraftRequest;
+import com.vodafone.ebuisness.exception.ConnectionErrorException;
 import com.vodafone.ebuisness.model.main.Account;
 import com.vodafone.ebuisness.model.main.ProductsInDeal;
-import com.vodafone.ebuisness.repository.PayPalRepository;
+import com.vodafone.ebuisness.service.PayPalService;
 import com.vodafone.ebuisness.service.AuthService;
 import com.vodafone.ebuisness.service.CartService;
 import com.vodafone.ebuisness.util.Adapters;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
@@ -26,7 +24,10 @@ import org.springframework.web.client.RestTemplate;
 import java.nio.charset.Charset;
 import java.util.Properties;
 
-public class PayPalRepositoryImpl implements PayPalRepository {
+public class PayPalServiceImpl implements PayPalService {
+
+    //used to throw exceptions occur while sending http requests to PayPal
+    private String defaultErrorMessage = "Problem connecting to PayPal services";
 
     @Autowired
     private RestTemplate restTemplate;
@@ -46,7 +47,7 @@ public class PayPalRepositoryImpl implements PayPalRepository {
     private String clientSecret;
     private Token token;
 
-    public PayPalRepositoryImpl(Properties properties) {
+    public PayPalServiceImpl(Properties properties) {
 
         this.properties = properties;
         url = properties.getProperty("paypal.api.url");
@@ -65,8 +66,7 @@ public class PayPalRepositoryImpl implements PayPalRepository {
 
     }
 
-    @Override
-    public String getRecentToken() {
+    private String getRecentToken() throws ConnectionErrorException {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -76,15 +76,24 @@ public class PayPalRepositoryImpl implements PayPalRepository {
         map.add("grant_type", "client_credentials");
 
         HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(map, headers);
+        ResponseEntity<Token> response = null;
+        try {
+            response = restTemplate.postForEntity(url + "/v1/oauth2/token", request, Token.class);
+        } catch (Exception e) {
 
-        ResponseEntity<Token> response = restTemplate.postForEntity(url + "/v1/oauth2/token", request, Token.class);
+            throw new ConnectionErrorException(defaultErrorMessage);
+        }
+
+        if (response == null || response.getStatusCode() != HttpStatus.OK) {
+            throw new ConnectionErrorException(defaultErrorMessage);
+        }
 
         token = response.getBody();
         return response.getBody().getAccess_token();
     }
 
     @Override
-    public String sendInvoice(String invoiceId) {
+    public String sendInvoice(String invoiceId) throws ConnectionErrorException {
 
         var headers = getAuthorizedHeaders();
 
@@ -93,8 +102,19 @@ public class PayPalRepositoryImpl implements PayPalRepository {
         var httpEntity = new HttpEntity<>(headers);
 
         //make the post request
-        ResponseEntity<String> response
-                = restTemplate.postForEntity(url + "/v2/invoicing/invoices/" + invoiceId + "/send", httpEntity, String.class);
+        ResponseEntity<String> response = null;
+        try {
+            response
+                    = restTemplate.postForEntity(url + "/v2/invoicing/invoices/" + invoiceId +
+                    "/send", httpEntity, String.class);
+        } catch (Exception e) {
+
+            throw new ConnectionErrorException(defaultErrorMessage);
+        }
+
+        if (response == null || response.getStatusCode() != HttpStatus.OK) {
+            throw new ConnectionErrorException(defaultErrorMessage);
+        }
 
         return extractLinkFromResponse(response.getBody());
     }
@@ -113,7 +133,8 @@ public class PayPalRepositoryImpl implements PayPalRepository {
     }
 
     @Override
-    public String createDraftInvoice(ProductsInDeal productsInDeal, Account account) {
+    public String createDraftInvoice(ProductsInDeal productsInDeal, Account account)
+            throws ConnectionErrorException {
 
         //creation of the request object
         var createInvoiceDraftRequest
@@ -135,8 +156,17 @@ public class PayPalRepositoryImpl implements PayPalRepository {
                 = new HttpEntity<>(createInvoiceDraftRequest, headers);
 
         //make the post request
-        ResponseEntity<String> response
-                = restTemplate.postForEntity(url + "/v2/invoicing/invoices", httpEntity, String.class);
+        ResponseEntity<String> response = null;
+        try {
+            response = restTemplate.postForEntity(url + "/v2/invoicing/invoices", httpEntity, String.class);
+        } catch (Exception e) {
+
+            throw new ConnectionErrorException(defaultErrorMessage);
+        }
+
+        if (response == null || response.getStatusCode() != HttpStatus.CREATED) {
+            throw new ConnectionErrorException(defaultErrorMessage);
+        }
 
         return extractInvoiceIdFromLink(response.getBody());
 
@@ -160,17 +190,28 @@ public class PayPalRepositoryImpl implements PayPalRepository {
     }
 
     //
-    public String generateInvoiceNumber() {
-        var headers
+    public String generateInvoiceNumber() throws ConnectionErrorException {
+        var httpEntity
                 = new HttpEntity<>(new LinkedMultiValueMap<>(), getAuthorizedHeaders());
-        var response = restTemplate.postForEntity(url + "/v2/invoicing/generate-next-invoice-number",
-                headers,
-                String.class);
+        ResponseEntity<String> response = null;
+        try {
+            response = restTemplate.postForEntity(url + "/v2/invoicing/generate-next-invoice-number",
+                    httpEntity,
+                    String.class);
+
+        } catch (Exception e) {
+
+            throw new ConnectionErrorException(defaultErrorMessage);
+        }
+
+        if (response == null || response.getStatusCode() != HttpStatus.OK) {
+            throw new ConnectionErrorException(defaultErrorMessage);
+        }
         var json = response.getBody();
         return json.split(":")[1].split("\"")[1];
     }
 
-    private HttpHeaders getAuthorizedHeaders() {
+    private HttpHeaders getAuthorizedHeaders() throws ConnectionErrorException {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -187,7 +228,7 @@ public class PayPalRepositoryImpl implements PayPalRepository {
     }
 
     @Override
-    public void cancelInvoice(String invoiceId) {
+    public void cancelInvoice(String invoiceId) throws ConnectionErrorException {
 
         var headers = getAuthorizedHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -195,7 +236,8 @@ public class PayPalRepositoryImpl implements PayPalRepository {
                 = new HttpEntity<>(new LinkedMultiValueMap<>(), headers);
 
         try {
-            restTemplate.postForLocation(url + "/v2/invoicing/invoices/" + invoiceId + "/cancel", httpEntity);
+            restTemplate.postForLocation(url + "/v2/invoicing/invoices/" + invoiceId +
+                    "/cancel", httpEntity);
         } catch (HttpClientErrorException e) {
 
             if (e.getMessage().equals("The requested action could not be performed," +
@@ -204,7 +246,12 @@ public class PayPalRepositoryImpl implements PayPalRepository {
             } else {
                 e.printStackTrace();
             }
+        } catch (Exception e) {
+
+            throw new ConnectionErrorException(defaultErrorMessage);
+
         }
+
     }
 
 }

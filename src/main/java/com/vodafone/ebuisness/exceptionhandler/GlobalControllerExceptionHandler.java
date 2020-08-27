@@ -93,4 +93,9 @@ class GlobalControllerExceptionHandler extends ResponseEntityExceptionHandler {
     public void handleNoAuthenticationFoundException(WebRequest request) {
     }
 
+    @ResponseStatus(value = HttpStatus.BAD_GATEWAY, reason = "Sorry there's a problem with the server connection, please try again later")
+    @ExceptionHandler(ConnectionErrorException.class)
+    public void handleConnectionErrorException(WebRequest request) {
+    }
+
 }

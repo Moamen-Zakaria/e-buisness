@@ -56,7 +56,7 @@ public class CustomerCartController {
     public void checkoutCart(
             @RequestParam @Valid @NotBlank String email)
             throws EmailDoesNotExistException, EmptyCartException,
-            MessagingException, ItemOutOfStockException {
+            MessagingException, ItemOutOfStockException, ConnectionErrorException {
         cartService.checkoutCart(email);
     }
 

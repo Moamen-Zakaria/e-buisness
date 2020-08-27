@@ -1,5 +1,6 @@
 package com.vodafone.ebuisness.model.auxiliary;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.vodafone.ebuisness.model.main.Product;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 
@@ -7,6 +8,8 @@ public class ProductInCart {
 
     @DBRef
     private Product product;
+
+    @JsonProperty("required_quantity")
     private Integer requiredQuantity;
 
     public ProductInCart() {
@@ -17,6 +20,7 @@ public class ProductInCart {
         this.requiredQuantity = requiredQuantity;
     }
 
+    @JsonProperty("in_stock")
     public Boolean isInStock(){
 
         return requiredQuantity <= product.getQuantity();
