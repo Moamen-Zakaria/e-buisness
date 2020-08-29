@@ -15,6 +15,7 @@ import org.bson.types.ObjectId;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -56,8 +57,25 @@ public class ProductsAndCategoriesServiceImpl implements ProductsAndCategoriesSe
     @Override
     public void removeCategoryFromProduct(String categoryId, String productId)
             throws NoSuchProductException, NoSuchCategoryException {
-        var optionalProduct = productRepository.findById(new ObjectId(productId));
-        var optionalCategory = categoryRepository.findById(new ObjectId(categoryId));
+        Optional<Product> optionalProduct = null;
+        Optional<Category> optionalCategory = null;
+
+        try {
+            optionalProduct = productRepository.findById(new ObjectId(productId));
+        } catch (IllegalArgumentException e) {
+            NoSuchProductException noSuchProductException = new NoSuchProductException("invalid product id");
+            noSuchProductException.initCause(e);
+            throw noSuchProductException;
+        }
+        try {
+            optionalCategory = categoryRepository.findById(new ObjectId(categoryId));
+        } catch (IllegalArgumentException e) {
+            NoSuchProductException noSuchProductException = new NoSuchProductException();
+            noSuchProductException.initCause(e);
+            throw noSuchProductException;
+
+        }
+
         Product product;
         Category category;
 
@@ -118,8 +136,10 @@ public class ProductsAndCategoriesServiceImpl implements ProductsAndCategoriesSe
     }
 
     @Override
-    public void deleteProduct(ObjectId _id) {
-
+    public void deleteProduct(ObjectId _id) throws NoSuchProductException {
+if(_id == null){
+    throw new NoSuchProductException();
+}
         productRepository.deleteById(_id);
 
     }
@@ -133,8 +153,11 @@ public class ProductsAndCategoriesServiceImpl implements ProductsAndCategoriesSe
     }
 
     @Override
-    public void deleteCategory(ObjectId _id) {
-
+    public void deleteCategory(ObjectId _id)
+            throws NoSuchCategoryException {
+        if (_id == null) {
+            throw new NoSuchCategoryException();
+        }
         categoryRepository.deleteById(_id);
 
     }
@@ -142,8 +165,12 @@ public class ProductsAndCategoriesServiceImpl implements ProductsAndCategoriesSe
     @Override
     public void addImageToProduct(byte[] image, String productId)
             throws NoSuchProductException, NoRoomForImageOfProductException {
-
-        var product = findProductById(new ObjectId(productId));
+        Product product = null;
+        try {
+            product = findProductById(new ObjectId(productId));
+        } catch (IllegalArgumentException iae) {
+            throw new NoSuchProductException();
+        }
         if (product.getImages() == null) {
             product.setImages(new ArrayList<>());
         }
@@ -157,8 +184,14 @@ public class ProductsAndCategoriesServiceImpl implements ProductsAndCategoriesSe
 
     @Override
     public void clearImagesFromProduct(String productId) throws NoSuchProductException {
-
-        var product = findProductById(new ObjectId(productId));
+        Product product = null;
+        try {
+            product = findProductById(new ObjectId(productId));
+        } catch (IllegalArgumentException e) {
+            NoSuchProductException noSuchProductException = new NoSuchProductException();
+            noSuchProductException.initCause(e);
+            throw noSuchProductException;
+        }
         if (product.getImages() == null) {
             return;
         }
@@ -170,20 +203,43 @@ public class ProductsAndCategoriesServiceImpl implements ProductsAndCategoriesSe
     @Override
     public void removeImageFromProduct(Integer index, String productId)
             throws NoSuchProductException, ImageDoesNotExistException {
-
+        if (index == null) {
+            throw new ImageDoesNotExistException("No image index defined!!");
+        }
         --index;
-        var product = findProductById(new ObjectId(productId));
+        Product product = null;
+        try {
+            product = findProductById(new ObjectId(productId));
+        } catch (IllegalArgumentException e) {
+            var noSuchProductException = new NoSuchProductException("No product id defined!!");
+            noSuchProductException.initCause(e);
+            throw noSuchProductException;
+        }
         if (product.getImages() == null || product.getImages().size() < index + 1) {
             throw new ImageDoesNotExistException();
         }
-        product.getImages().remove(index.intValue());
+        try {
+            product.getImages().remove(index.intValue());
+        } catch (IndexOutOfBoundsException e) {
+            var imageDoesNotExistException = new ImageDoesNotExistException("No image with that index!!");
+            imageDoesNotExistException.initCause(e);
+            throw imageDoesNotExistException;
+        }
         saveOrUpdateProduct(product);
 
     }
 
     @Override
     public List<Binary> getImagesOfProduct(String productId) throws NoSuchProductException {
-        return findProductById(new ObjectId(productId)).getImages();
+        List<Binary> listOfBinaries = null;
+        try {
+            listOfBinaries = findProductById(new ObjectId(productId)).getImages();
+        } catch (IllegalArgumentException iae) {
+            var noSuchProductException = new NoSuchProductException();
+            noSuchProductException.initCause(iae);
+            throw noSuchProductException;
+        }
+        return listOfBinaries;
     }
 
 }

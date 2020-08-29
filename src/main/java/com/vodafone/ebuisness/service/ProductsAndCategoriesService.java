@@ -32,9 +32,9 @@ public interface ProductsAndCategoriesService {
 
     List<Category> getAllCategories();
 
-    void deleteProduct(ObjectId _id);
+    void deleteProduct(ObjectId _id) throws NoSuchProductException;
 
-    void deleteCategory(ObjectId _id);
+    void deleteCategory(ObjectId _id) throws NoSuchCategoryException;
 
     void addImageToProduct(byte[] image, String productId) throws NoSuchProductException, NoRoomForImageOfProductException;
 

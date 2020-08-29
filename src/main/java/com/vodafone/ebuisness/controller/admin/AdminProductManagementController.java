@@ -89,7 +89,7 @@ public class AdminProductManagementController {
     }
 
     @DeleteMapping("/products")
-    public ResponseEntity deleteProduct(@RequestParam("id") String id) {
+    public ResponseEntity deleteProduct(@RequestParam("id") String id) throws NoSuchProductException {
 
         productsAndCategoriesService.deleteProduct(new ObjectId(id));
         return new ResponseEntity("success!", HttpStatus.NO_CONTENT);
@@ -97,7 +97,7 @@ public class AdminProductManagementController {
     }
 
     @DeleteMapping("/categories")
-    public ResponseEntity deleteCategory(@RequestParam("id") String id) {
+    public ResponseEntity deleteCategory(@RequestParam("id") String id) throws NoSuchCategoryException {
 
         productsAndCategoriesService.deleteCategory(new ObjectId(id));
         return new ResponseEntity("success!", HttpStatus.NO_CONTENT);
