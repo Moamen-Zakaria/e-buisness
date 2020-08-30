@@ -47,11 +47,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
                 .antMatchers("/admin/retail/**").hasRole(AccountRole.ADMIN)
                 .antMatchers("/admin/auth/**").hasRole(AccountRole.ADMIN)
+                .antMatchers("/admin/carts/**").hasRole(AccountRole.ADMIN)
 
                 .antMatchers("/customer/carts/**").hasRole(AccountRole.USER)
+                .antMatchers("/customer/carts/**").hasAnyRole(AccountRole.USER)
 
                 .antMatchers("/shared/accounts/**").hasAnyRole(AccountRole.ADMIN , AccountRole.USER)
-                .antMatchers("/shared/carts/**").hasAnyRole(AccountRole.ADMIN , AccountRole.USER)
 
                 .anyRequest().permitAll()
 

@@ -114,16 +114,12 @@ public class JwtTokenProviderImpl implements JwtTokenProvider {
 
 
     @Override
-    public void logout(String email, String refreshToken)
-            throws NoAuthenticationFoundException, RefreshTokenNotValidException {
+    public void logout(String email)
+            throws NoAuthenticationFoundException {
 
         if (!tokensCache.containsKey(email)) {
             throw new NoAuthenticationFoundException();
         }
-        if (!tokensCache.containsValue(refreshToken)) {
-            throw new RefreshTokenNotValidException();
-        }
-
         tokensCache.remove(email);
 
     }

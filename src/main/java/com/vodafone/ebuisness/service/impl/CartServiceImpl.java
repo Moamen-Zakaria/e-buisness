@@ -270,9 +270,12 @@ public class CartServiceImpl implements CartService {
 
     @Override
     @Transactional
-    public void cancelInvoice(String invoiceId) throws ConnectionErrorException {
+    public void cancelInvoice(String invoiceId) throws ConnectionErrorException, NoSuchInvoiceException {
         var productsInDeal =
                 productsInDealRepository.findProductsInDealByInvoiceId(invoiceId);
+        if(productsInDeal == null){
+            throw new NoSuchInvoiceException();
+        }
         payPalService.cancelInvoice(invoiceId);
         productsInDeal.getInvoice().setStatus(InvoiceStatus.CANCELLED);
         productsInDealRepository.save(productsInDeal);

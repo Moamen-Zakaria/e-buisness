@@ -44,7 +44,7 @@ public class ProductsController {
 
     @GetMapping("/products/images")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void getAllImagesOfProduct(@RequestParam @NotBlank String productId,
+    public void getAllImagesOfProduct(@RequestParam("product_id") @NotBlank String productId,
                                       HttpServletResponse response)
             throws NoSuchProductException, IOException {
 

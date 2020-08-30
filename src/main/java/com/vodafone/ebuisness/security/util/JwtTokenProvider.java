@@ -22,5 +22,5 @@ public interface JwtTokenProvider {
 
     String createNewRefreshToken(String email);
 
-    void logout(String email, String refreshToken) throws NoAuthenticationFoundException, RefreshTokenNotValidException;
+    void logout(String email) throws NoAuthenticationFoundException;
 }

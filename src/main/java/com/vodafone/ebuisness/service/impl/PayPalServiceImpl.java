@@ -112,7 +112,7 @@ public class PayPalServiceImpl implements PayPalService {
             throw new ConnectionErrorException(defaultErrorMessage);
         }
 
-        if (response == null || response.getStatusCode() != HttpStatus.OK) {
+        if (response == null || response.getStatusCode() != HttpStatus.ACCEPTED) {
             throw new ConnectionErrorException(defaultErrorMessage);
         }
 

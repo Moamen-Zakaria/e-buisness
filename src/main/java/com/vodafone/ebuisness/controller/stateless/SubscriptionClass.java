@@ -14,7 +14,7 @@ import javax.validation.constraints.NotBlank;
 import java.util.Set;
 
 @RestController
-@RequestMapping("/shared/subscriptions")
+@RequestMapping("/subscriptions")
 public class SubscriptionClass {
 
     @Autowired
@@ -23,7 +23,7 @@ public class SubscriptionClass {
     @PostMapping("/add")
     @ResponseStatus(value = HttpStatus.CREATED)
     public void addSubscription(@RequestParam @NotBlank String email,
-                                @RequestParam @NotBlank String categoryName)
+                                @RequestParam("category_name") @NotBlank String categoryName)
             throws NoSuchCategoryException {
         subscriptionService.subscribeInCategory(email, categoryName);
     }
@@ -31,7 +31,7 @@ public class SubscriptionClass {
     @DeleteMapping("/remove")
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     public void removeSubscription(@RequestParam @NotBlank @Email String email,
-                                   @RequestParam @NotBlank String categoryName)
+                                   @RequestParam("category_name") @NotBlank String categoryName)
             throws NoSuchCategoryException {
         subscriptionService.removeSubscriptionFromCategory(email, categoryName);
     }

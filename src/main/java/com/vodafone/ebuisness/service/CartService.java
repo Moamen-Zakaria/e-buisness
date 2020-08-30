@@ -27,5 +27,5 @@ public interface CartService {
 
     void checkoutCart(String email) throws EmailDoesNotExistException, EmptyCartException, MessagingException, ItemOutOfStockException, ConnectionErrorException;
 
-    void cancelInvoice(String invoiceId) throws ConnectionErrorException;
+    void cancelInvoice(String invoiceId) throws ConnectionErrorException, NoSuchInvoiceException;
 }

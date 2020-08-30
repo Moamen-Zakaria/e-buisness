@@ -1,5 +1,6 @@
 package com.vodafone.ebuisness.controller.stateless;
 
+import com.vodafone.ebuisness.configuration.AccountRole;
 import com.vodafone.ebuisness.dto.security.LoginResponse;
 import com.vodafone.ebuisness.exception.EmailAlreadyExistException;
 import com.vodafone.ebuisness.exception.LoginFailException;
@@ -18,6 +19,9 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
@@ -37,6 +41,9 @@ public class AccountsController {
     @ResponseStatus(value = HttpStatus.CREATED)
     public Account register(@Valid Account account)
             throws EmailAlreadyExistException {
+        Set<String> roles = new HashSet<>();
+        roles.add(AccountRole.ROLE_USER);
+        account.setRoles(roles);
         authService.register(account);
 
         new Thread(() -> {
@@ -68,7 +75,7 @@ public class AccountsController {
     @ResponseStatus(value = HttpStatus.OK)
     public String refresh(
             @RequestParam @NotNull @NotBlank(message = "No valid email provided") String email,
-            @RequestParam @NotNull @NotBlank(message = "No valid token provided") String refreshToken)
+            @RequestParam("refresh_token") @NotNull @NotBlank(message = "No valid token provided") String refreshToken)
             throws RefreshTokenNotValidException {
         return jwtTokenProvider.refreshToken(email, refreshToken);
     }

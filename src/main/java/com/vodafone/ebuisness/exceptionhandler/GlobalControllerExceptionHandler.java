@@ -98,4 +98,9 @@ class GlobalControllerExceptionHandler extends ResponseEntityExceptionHandler {
     public void handleConnectionErrorException(WebRequest request) {
     }
 
+    @ResponseStatus(value = HttpStatus.CONFLICT, reason = "No such invoice found!")
+    @ExceptionHandler(NoSuchInvoiceException.class)
+    public void handleNoSuchInvoiceException(WebRequest request) {
+    }
+
 }

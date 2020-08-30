@@ -16,6 +16,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.security.Principal;
 
 @RestController
 @RequestMapping("/shared/accounts")
@@ -30,9 +31,10 @@ public class AccountManagementController {
     @PutMapping("/update")
     @ResponseStatus(value = HttpStatus.OK)
     public Account updateAccount(
-            @RequestParam("objectId") @NotBlank(message = "Please provide an id") String id
+            Principal principal
             , @Valid Account account) throws EmailDoesNotExistException {
-        account.setObjectId(new ObjectId(id));
+        ObjectId accountId = authService.findAccountByEmail(principal.getName()).getObjectId();
+        account.setObjectId(accountId);
         account = authService.update(account);
         return account;
 
@@ -40,37 +42,16 @@ public class AccountManagementController {
 
     @DeleteMapping("/delete")
     @ResponseStatus(value = HttpStatus.ACCEPTED)
-    public void deleteAccount(
-            @RequestParam("email") @Email @NotBlank(message = "Please provide an email!") String email)
+    public void deleteAccount(Principal principal)
             throws EmailDoesNotExistException {
-        authService.deleteAccount(email);
-    }
-
-    @GetMapping("get/id/{id}")
-    @ResponseStatus(value = HttpStatus.ACCEPTED)
-    public Account getAccountById(@PathVariable String id) throws EmailDoesNotExistException {
-        return authService.findAccountById(id);
-    }
-
-    @GetMapping("get/username/{username}")
-    @ResponseStatus(value = HttpStatus.ACCEPTED)
-    public Account getAccountByUsername(@PathVariable String username) throws EmailDoesNotExistException {
-        return authService.findAccountByUsername(username);
-    }
-
-    @GetMapping("get/email/{email}")
-    @ResponseStatus(value = HttpStatus.ACCEPTED)
-    public Account getAccountByEmail(@PathVariable String email) throws EmailDoesNotExistException {
-        return authService.findAccountByEmail(email);
+        authService.deleteAccount(principal.getName());
     }
 
     @PostMapping("/logout")
     @ResponseStatus(value = HttpStatus.OK)
-    public void logout(
-            @RequestParam @NotNull @NotBlank(message = "No valid email provided") String email,
-            @RequestParam @NotNull @NotBlank(message = "No valid token provided") String refreshToken)
-            throws RefreshTokenNotValidException, NoAuthenticationFoundException {
-        jwtTokenProvider.logout(email, refreshToken);
+    public void logout(Principal principal)
+            throws NoAuthenticationFoundException {
+        jwtTokenProvider.logout(principal.getName());
     }
 
 }

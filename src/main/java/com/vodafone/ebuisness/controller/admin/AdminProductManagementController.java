@@ -38,6 +38,8 @@ public class AdminProductManagementController {
     @PostMapping({"/products/add", "/products/update"})
     public ResponseEntity addProduct(@Valid Product product) {
         Boolean success;
+        product.setCategories(null);
+        product.setImages(null);
         success = productsAndCategoriesService.saveOrUpdateProduct(product);
         if (success) {
             new Thread(() -> {
@@ -54,7 +56,7 @@ public class AdminProductManagementController {
 
     @PostMapping({"/productsAndCategories/add", "/productsAndCategories/update"})
     public ResponseEntity addProductWithCategory(@Valid Product product,
-                                                 @RequestParam String categoryId)
+                                                 @RequestParam("category_id") String categoryId)
             throws NoSuchCategoryException {
 
         Boolean success;
@@ -90,7 +92,6 @@ public class AdminProductManagementController {
 
     @DeleteMapping("/products")
     public ResponseEntity deleteProduct(@RequestParam("id") String id) throws NoSuchProductException {
-
         productsAndCategoriesService.deleteProduct(new ObjectId(id));
         return new ResponseEntity("success!", HttpStatus.NO_CONTENT);
 
@@ -98,7 +99,6 @@ public class AdminProductManagementController {
 
     @DeleteMapping("/categories")
     public ResponseEntity deleteCategory(@RequestParam("id") String id) throws NoSuchCategoryException {
-
         productsAndCategoriesService.deleteCategory(new ObjectId(id));
         return new ResponseEntity("success!", HttpStatus.NO_CONTENT);
     }
@@ -106,8 +106,8 @@ public class AdminProductManagementController {
     @PostMapping("/categories/add/to/product")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void addCategoryToProduct(
-            @RequestParam @NotBlank String categoryId,
-            @RequestParam @NotBlank String productId)
+            @RequestParam("category_id") @NotBlank String categoryId,
+            @RequestParam("product_id") @NotBlank String productId)
             throws NoSuchProductException, NoSuchCategoryException {
         productsAndCategoriesService.addCategoryToProduct(categoryId, productId);
     }
@@ -115,15 +115,15 @@ public class AdminProductManagementController {
     @DeleteMapping("/categories/remove/from/product")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void removeCategoryFromProduct(
-            @RequestParam @NotBlank String categoryId,
-            @RequestParam @NotBlank String productId)
+            @RequestParam("category_id") @NotBlank String categoryId,
+            @RequestParam("product_id") @NotBlank String productId)
             throws NoSuchProductException, NoSuchCategoryException {
         productsAndCategoriesService.removeCategoryFromProduct(categoryId, productId);
     }
 
     @PutMapping("/products/image/update")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void updateImagesOfProduct(@RequestParam String productId,
+    public void updateImagesOfProduct(@RequestParam("product_id") String productId,
                                       @RequestParam("image") @Max(6) MultipartFile[] images)
             throws NoSuchProductException, IOException, InvalidImageFormatException {
 
@@ -143,7 +143,7 @@ public class AdminProductManagementController {
 
     @PostMapping("/products/image/add")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void addImageToProduct(@RequestParam String productId,
+    public void addImageToProduct(@RequestParam("product_id") String productId,
                                   @RequestParam MultipartFile image)
             throws NoSuchProductException, IOException, NoRoomForImageOfProductException, InvalidImageFormatException {
 
@@ -155,14 +155,14 @@ public class AdminProductManagementController {
 
     @DeleteMapping("/products/image/clear")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void clearImagesFromProduct(@RequestParam @NotBlank String productId)
+    public void clearImagesFromProduct(@RequestParam("product_id") @NotBlank String productId)
             throws NoSuchProductException {
         productsAndCategoriesService.clearImagesFromProduct(productId);
     }
 
     @DeleteMapping("/products/image/remove/")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void removeImageFromProduct(@RequestParam @NotBlank String productId,
+    public void removeImageFromProduct(@RequestParam("product_id") @NotBlank String productId,
                                        @RequestParam @NotBlank Integer index)
             throws NoSuchProductException, ImageDoesNotExistException {
         productsAndCategoriesService.removeImageFromProduct(index, productId);
@@ -171,7 +171,8 @@ public class AdminProductManagementController {
 
     @DeleteMapping("/products/invoice/remove/")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteInvoice(@RequestParam @NotBlank String invoiceId) throws ConnectionErrorException {
+    public void deleteInvoice(@RequestParam("invoice_id") @NotBlank String invoiceId)
+            throws ConnectionErrorException, NoSuchInvoiceException {
         cartService.cancelInvoice(invoiceId);
     }
 
