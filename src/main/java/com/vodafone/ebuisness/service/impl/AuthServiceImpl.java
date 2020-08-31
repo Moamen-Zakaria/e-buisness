@@ -24,6 +24,14 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
     @Autowired
     private AccountRepository accountRepository;
 
+    public AccountRepository getAccountRepository() {
+        return accountRepository;
+    }
+
+    public void setAccountRepository(AccountRepository accountRepository) {
+        this.accountRepository = accountRepository;
+    }
+
     @Override
     public Boolean register(Account account) throws EmailAlreadyExistException {
 
@@ -85,6 +93,7 @@ public class AuthServiceImpl implements AuthService, UserDetailsService {
 
     @Override
     public Account findAccountByEmail(String email) throws EmailDoesNotExistException {
+
 
         var existingAccount = accountRepository.findByEmail(email);
         if (existingAccount == null) {

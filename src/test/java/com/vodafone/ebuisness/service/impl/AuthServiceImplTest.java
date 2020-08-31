@@ -16,36 +16,32 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Optional;
+
+import static org.mockito.Mockito.*;
+
 @SpringBootTest
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class AuthServiceImplTest {
 
-    @Autowired
-    @Qualifier("authServiceImpl")
-    private AuthService authService;
-
-    @Autowired
-    private AccountRepository accountRepository;
-
-    private ObjectId id;
-
-    @BeforeAll
-    void setUp() {
-        Account account = new Account();
-        account.setUsername("user1");
-        account.setEmail("email1@abc.com");
-        account.setPassword("password");
-        Account account2 = new Account();
-        account.setUsername("user2");
-        account.setEmail("email2@abc.com");
-        account.setPassword("password");
-        accountRepository.insert(account);
-        accountRepository.insert(account2);
+    public AuthServiceImplTest() {
+        AuthServiceImpl authServiceImpl = new AuthServiceImpl();
+        accountRepository = spy(AccountRepository.class);
+        authServiceImpl.setAccountRepository(accountRepository);
+        authService = authServiceImpl;
     }
 
+    private AuthService authService;
+    private AccountRepository accountRepository;
+
+    @BeforeEach
+    void beforeEach() throws EmailAlreadyExistException {
+        reset(accountRepository);
+    }
+
+
     @Test
-    @Order(1)
     void registerAccount() throws EmailAlreadyExistException {
 
         Date date = new Date(17, 9, 1995);
@@ -58,90 +54,121 @@ class AuthServiceImplTest {
                 = new PersonName("firstName", "middleName", "lastName");
 
         Account account = new Account();
+        account.setObjectId(new ObjectId());
         account.setUsername("some Name");
         account.setPassword("password");
         account.setEmail("example@abc.com");
         account.setPersonName(personName);
         account.setAddress(address);
         account.setDateOfBirth(date);
+        when(accountRepository.save(account)).thenReturn(account);
         Boolean isSaved = authService.register(account);
 
         Assertions.assertEquals(true, isSaved);
         Assertions.assertNotNull(account.getObjectId());
 
-        id = account.getObjectId();
+        verify(accountRepository).save(account);
 
     }
 
     @Test
-    @Order(2)
     void findAccountByEmail() throws EmailDoesNotExistException {
-        Account account = authService.findAccountByEmail("example@abc.com");
+        Account account = new Account();
+        account.setEmail("example@abc.com");
+        when(accountRepository.findByEmail("example@abc.com")).thenReturn(account);
+        account = authService.findAccountByEmail("example@abc.com");
         Assertions.assertNotNull(account);
         Assertions.assertEquals("example@abc.com", account.getEmail());
-
+        verify(accountRepository).findByEmail("example@abc.com");
     }
 
     @Test
-    @Order(3)
     void loadUserByUsername() {
+        Account account = new Account();
+        account.setEmail("example@abc.com");
+        when(accountRepository.findByEmail("example@abc.com")).thenReturn(account);
         var userDetails
                 = ((UserDetailsService) authService).loadUserByUsername("example@abc.com");
         Assertions.assertEquals("example@abc.com", userDetails.getUsername());
+        verify(accountRepository).findByEmail("example@abc.com");
+
     }
 
     @Test
-    @Order(4)
     void findAccountByUsername() throws EmailDoesNotExistException {
-        Account account = authService.findAccountByUsername("some Name");
+        Account account = new Account();
+        account.setUsername("some Name");
+        when(accountRepository.findByUsername("some Name")).thenReturn(account);
+        account = authService.findAccountByUsername("some Name");
         Assertions.assertEquals("some Name", account.getUsername());
+        verify(accountRepository).findByUsername("some Name");
     }
 
     @Test
-    @Order(5)
     void findAccountById() throws EmailDoesNotExistException {
-        Account account = authService.findAccountById(id.toHexString());
+        Account account = new Account();
+        account.setObjectId(new ObjectId());
+        when(accountRepository.findById(account.getObjectId())).thenReturn(Optional.of(account));
+        account = authService.findAccountById(account.getObjectId().toHexString());
         Assertions.assertNotNull(account);
+        verify(accountRepository).findById(account.getObjectId());
     }
 
     @Test
-    @Order(6)
     void getAllAccounts() {
-        var listOfAccounts = authService.getAllAccounts();
-        Assertions.assertNotNull(listOfAccounts);
-        Assertions.assertEquals(3 , listOfAccounts.size());
+        var listOfAccounts = new ArrayList<Account>();
+        listOfAccounts.add(new Account());
+        listOfAccounts.add(new Account());
+        listOfAccounts.add(new Account());
+        when(accountRepository.findAll()).thenReturn(listOfAccounts);
+        var newListOfAccounts = authService.getAllAccounts();
+        Assertions.assertNotNull(newListOfAccounts);
+        Assertions.assertEquals(3, newListOfAccounts.size());
     }
 
     @Test
-    @Order(7)
     void update() throws EmailDoesNotExistException {
-        Account account = authService.findAccountById(id.toHexString());
+        Account account = new Account();
+        account.setObjectId(new ObjectId());
+        account.setEmail("example@abc.com");
+        when(accountRepository.findById(account.getObjectId())).thenReturn(Optional.of(account));
+        when(accountRepository.save(account)).thenReturn(account);
+        when(accountRepository.findByEmail("example@abc.com")).thenReturn(account);
+        account = authService.findAccountById(account.getObjectId().toHexString());
         account.setUsername("Some Username");
         authService.update(account);
-        Account newAccount = authService.findAccountById(id.toHexString());
+        Account newAccount = authService.findAccountById(account.getObjectId().toHexString());
         Assertions.assertEquals("Some Username", newAccount.getUsername());
     }
 
     @Test
-    @Order(8)
     void login() throws LoginFailException {
-        Account account = authService.login("example@abc.com", "password");
+        Account account = new Account();
+        account.setObjectId(new ObjectId());
+        account.setEmail("example@abc.com");
+        when(accountRepository.findByEmailAndPassword("example@abc.com" , "password" )).thenReturn(account);
+        when(accountRepository.findByEmail("example@abc.com")).thenReturn(account);
+        account = authService.login("example@abc.com", "password");
         Assertions.assertNotNull(account);
         Assertions.assertEquals("example@abc.com", account.getEmail());
     }
 
     @Test
-    @Order(9)
     void loginFail() {
         Assertions.assertThrows(LoginFailException.class,
                 () -> authService.login("wrong email", "wrong password"));
     }
 
     @Test
-    @Order(10)
     void grantRole() throws EmailDoesNotExistException {
+        Account account = new Account();
+        account.setObjectId(new ObjectId());
+        account.setEmail("example@abc.com");
+        when(accountRepository.findByEmail("example@abc.com")).thenReturn(account);
+        when(accountRepository.save(account)).thenReturn(account);
+        when(accountRepository.findById(account.getObjectId())).thenReturn(Optional.of(account));
         Boolean isUpdated = authService.grantRole("example@abc.com", "Role_Test");
-        Account account = authService.findAccountById(id.toHexString());
+        account = authService.findAccountById(account.getObjectId().toHexString());
         Assertions.assertEquals(true, isUpdated);
         Assertions.assertNotNull(account.getRoles());
         Assertions.assertEquals(true, account.getRoles().contains("Role_Test"));
@@ -150,10 +177,17 @@ class AuthServiceImplTest {
     }
 
     @Test
-    @Order(11)
     void hasRole() throws EmailDoesNotExistException {
+        Account account = new Account();
+        var setOfRoles = new HashSet<String>();
+        setOfRoles.add("Role_Test");
+        account.setObjectId(new ObjectId());
+        account.setEmail("example@abc.com");
+        account.setRoles(setOfRoles);
+        when(accountRepository.findByEmail("example@abc.com")).thenReturn(account);
+        when(accountRepository.findById(account.getObjectId())).thenReturn(Optional.of(account));
         Boolean hasRole = authService.hasRole("example@abc.com", "Role_Test");
-        Account account = authService.findAccountById(id.toHexString());
+        account = authService.findAccountById(account.getObjectId().toHexString());
         Assertions.assertTrue(hasRole);
         Assertions.assertNotNull(account.getRoles());
         Assertions.assertTrue(account.getRoles().contains("Role_Test"));
@@ -162,10 +196,17 @@ class AuthServiceImplTest {
     }
 
     @Test
-    @Order(12)
     void revokeRole() throws EmailDoesNotExistException {
+        Account account = new Account();
+        account.setEmail("example@abc.com");
+        account.setObjectId(new ObjectId());
+        var setOfRoles = new HashSet<String>();
+        setOfRoles.add("Role_Test");
+        account.setRoles(setOfRoles);
+        when(accountRepository.findByEmail("example@abc.com")).thenReturn(account);
+        when(accountRepository.findById(account.getObjectId())).thenReturn(Optional.of(account));
         Boolean isRevoked = authService.revokeRole("example@abc.com", "Role_Test");
-        Account account = authService.findAccountById(id.toHexString());
+        account = authService.findAccountById(account.getObjectId().toHexString());
         Assertions.assertTrue(isRevoked);
         if (account.getRoles() != null) {
             Assertions.assertFalse(account.getRoles().contains("Role_Test"));
@@ -175,11 +216,14 @@ class AuthServiceImplTest {
     }
 
     @Test
-    @Order(13)
     void deleteAccount() throws EmailDoesNotExistException {
+        Account account = new Account();
+        account.setEmail("example@abc.com");
+        account.setObjectId(new ObjectId());
+        when(accountRepository.findByEmail("example@abc.com")).thenReturn(account);
         authService.deleteAccount("example@abc.com");
         Assertions.assertThrows(EmailDoesNotExistException.class,
-                () -> authService.findAccountById(id.toHexString()));
+                () -> authService.findAccountById(account.getObjectId().toHexString()));
     }
 
 }

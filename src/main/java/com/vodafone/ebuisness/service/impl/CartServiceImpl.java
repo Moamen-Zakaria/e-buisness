@@ -16,6 +16,7 @@ import com.vodafone.ebuisness.service.ProductsAndCategoriesService;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
