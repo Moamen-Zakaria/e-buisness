@@ -1,16 +1,19 @@
 package com.vodafone.ebuisness.service.impl;
 
-import com.vodafone.ebuisness.exception.*;
-import com.vodafone.ebuisness.model.auxiliary.Address;
-import com.vodafone.ebuisness.model.auxiliary.Date;
-import com.vodafone.ebuisness.model.auxiliary.PersonName;
-import com.vodafone.ebuisness.model.main.Account;
+import com.vodafone.ebuisness.exception.ImageDoesNotExistException;
+import com.vodafone.ebuisness.exception.NoRoomForImageOfProductException;
+import com.vodafone.ebuisness.exception.NoSuchCategoryException;
+import com.vodafone.ebuisness.exception.NoSuchProductException;
 import com.vodafone.ebuisness.model.main.Category;
 import com.vodafone.ebuisness.model.main.Product;
-import com.vodafone.ebuisness.service.AuthService;
+import com.vodafone.ebuisness.repository.CategoryRepository;
+import com.vodafone.ebuisness.repository.ProductRepository;
 import com.vodafone.ebuisness.service.ProductsAndCategoriesService;
+import org.bson.types.Binary;
 import org.bson.types.ObjectId;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -18,20 +21,30 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static org.mockito.Mockito.*;
+
 @SpringBootTest
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class ProductsAndCategoriesServiceImplTest {
 
-    @Autowired
-    private AuthService authService;
+    public ProductsAndCategoriesServiceImplTest() {
+        var productsAndCategoriesServiceImpl = new ProductsAndCategoriesServiceImpl();
+        categoryRepository = spy(CategoryRepository.class);
+        productsAndCategoriesServiceImpl.setCategoryRepository(categoryRepository);
+        productRepository = spy(ProductRepository.class);
+        productsAndCategoriesServiceImpl.setProductRepository(productRepository);
+        productsAndCategoriesService = productsAndCategoriesServiceImpl;
+    }
 
-    @Autowired
     private ProductsAndCategoriesService productsAndCategoriesService;
 
+    private CategoryRepository categoryRepository;
+    private ProductRepository productRepository;
     private Product product;
     private Category category;
 
@@ -39,80 +52,43 @@ class ProductsAndCategoriesServiceImplTest {
             = "src/test/resources/product image for testing.png";
 
 
-    @BeforeAll
-    void setUp() throws EmailAlreadyExistException {
-
-        Account account;
-
-        try {
-
-            account = authService.findAccountByEmail("example@abc.com");
-
-        } catch (EmailDoesNotExistException e) {
-
-            account = null;
-        }
-
-        if (account == null) {
-
-            account = new Account();
-            Date date = new Date(17, 9, 1995);
-
-            Address address = new Address();
-            address.setCountry("Some country");
-            address.setProvince("some province");
-
-            PersonName personName
-                    = new PersonName("firstName", "middleName", "lastName");
-
-            account.setUsername("some Name");
-            account.setPassword("password");
-            account.setEmail("example@abc.com");
-            account.setPersonName(personName);
-            account.setAddress(address);
-            account.setDateOfBirth(date);
-            authService.register(account);
-        }
-
-    }
-
     @Test
-    @Order(1)
     void saveOrUpdateProduct() {
 
         Product product = new Product();
+        product.setObjectId(new ObjectId());
         product.setName("lavender perfume");
         product.setQuantity(50);
         product.setPrice(10000.0);
         product.setDescription("make a relaxing smell");
+        when(productRepository.save(product)).thenReturn(product);
         Boolean isProductSaved = productsAndCategoriesService.saveOrUpdateProduct(product);
-        this.product = product;
-
         Assertions.assertTrue(isProductSaved);
 
     }
 
     @Test
-    @Order(2)
     void getAllProducts() {
 
-        var listOfProducts = productsAndCategoriesService.getAllProducts();
-
+        Product product = new Product();
+        List<Product> listOfProducts = new ArrayList<>();
+        listOfProducts.add(product);
+        when(productRepository.findAll()).thenReturn(listOfProducts);
+        listOfProducts = productsAndCategoriesService.getAllProducts();
         Assertions.assertNotNull(listOfProducts);
         Assertions.assertEquals(1, listOfProducts.size());
 
     }
 
     @Test
-    @Order(3)
     void findProductById() throws NoSuchProductException {
-        var listOfProducts = productsAndCategoriesService.getAllProducts();
 
-        var productId = listOfProducts.stream().filter(product -> product.getName()
-                .equals("lavender perfume")).collect(Collectors.toList()).get(0).getObjectId();
-        this.product.setObjectId(productId);
+        Product product = new Product();
+        product.setObjectId(new ObjectId());
+        product.setName("lavender perfume");
+        when(productRepository.findById(product.getObjectId())).thenReturn(Optional.of(product));
 
-        Product product = productsAndCategoriesService.findProductById(productId);
+        product = productsAndCategoriesService.findProductById(product.getObjectId());
 
         Assertions.assertNotNull(product);
         Assertions.assertEquals("lavender perfume", product.getName());
@@ -120,7 +96,6 @@ class ProductsAndCategoriesServiceImplTest {
     }
 
     @Test
-    @Order(4)
     void findProductByIdIfProductDoesNotExist() {
 
         Assertions.assertThrows(NoSuchProductException.class, () ->
@@ -129,23 +104,28 @@ class ProductsAndCategoriesServiceImplTest {
     }
 
     @Test
-    @Order(5)
     void saveOrUpdateCategory() {
 
         Category cosmeticsCategory
                 = new Category("Cosmetics", "Make the world beautiful", new HashSet<>());
+        cosmeticsCategory.setObjectId(new ObjectId());
+        when(categoryRepository.save(cosmeticsCategory)).thenReturn(cosmeticsCategory);
         Boolean isCategorySaved = productsAndCategoriesService.saveOrUpdateCategory(cosmeticsCategory);
-        this.category = cosmeticsCategory;
-
         Assertions.assertTrue(isCategorySaved);
 
     }
 
     @Test
-    @Order(6)
     void getAllCategories() {
 
-        var listOfCategories = productsAndCategoriesService.getAllCategories();
+        Category cosmeticsCategory
+                = new Category("Cosmetics", "Make the world beautiful", new HashSet<>());
+        List<Category> listOfCategories = new ArrayList<>();
+        listOfCategories.add(cosmeticsCategory);
+
+        when(categoryRepository.findAll()).thenReturn(listOfCategories);
+
+        listOfCategories = productsAndCategoriesService.getAllCategories();
 
         Assertions.assertNotNull(listOfCategories);
         Assertions.assertEquals(1, listOfCategories.size());
@@ -153,16 +133,13 @@ class ProductsAndCategoriesServiceImplTest {
     }
 
     @Test
-    @Order(7)
     void findCategoryById() throws NoSuchCategoryException {
 
-        var listOfCategories = productsAndCategoriesService.getAllCategories();
-
-        var categoryId = listOfCategories.stream().filter(product -> product.getName()
-                .equals("Cosmetics")).collect(Collectors.toList()).get(0).getObjectId();
-        this.category.setObjectId(categoryId);
-
-        Category category = productsAndCategoriesService.findCategoryById(categoryId);
+        Category cosmeticsCategory
+                = new Category("Cosmetics", "Make the world beautiful", new HashSet<>());
+        cosmeticsCategory.setObjectId(new ObjectId());
+        when(categoryRepository.findById(cosmeticsCategory.getObjectId())).thenReturn(Optional.of(cosmeticsCategory));
+        category = productsAndCategoriesService.findCategoryById(cosmeticsCategory.getObjectId());
 
         Assertions.assertNotNull(category);
         Assertions.assertEquals("Cosmetics", category.getName());
@@ -170,7 +147,6 @@ class ProductsAndCategoriesServiceImplTest {
     }
 
     @Test
-    @Order(8)
     void findCategoryByIdIfCategoryDoesNotExist() {
 
         Assertions.assertThrows(NoSuchCategoryException.class, () ->
@@ -179,10 +155,21 @@ class ProductsAndCategoriesServiceImplTest {
     }
 
     @Test
-    @Order(9)
     void addCategoryToProduct() throws NoSuchProductException, NoSuchCategoryException {
 
-        productsAndCategoriesService.addCategoryToProduct(category.getObjectId().toHexString(),
+        //stubbing category
+        Category cosmeticsCategory
+                = new Category("Cosmetics", "Make the world beautiful", new HashSet<>());
+        cosmeticsCategory.setObjectId(new ObjectId());
+        when(categoryRepository.findById(cosmeticsCategory.getObjectId())).thenReturn(Optional.of(cosmeticsCategory));
+
+        //stubbing product
+        Product product = new Product();
+        product.setObjectId(new ObjectId());
+        product.setName("lavender perfume");
+        when(productRepository.findById(product.getObjectId())).thenReturn(Optional.of(product));
+
+        productsAndCategoriesService.addCategoryToProduct(cosmeticsCategory.getObjectId().toHexString(),
                 product.getObjectId().toHexString());
 
         var productFromDatabase = productsAndCategoriesService.findProductById(product.getObjectId());
@@ -192,12 +179,17 @@ class ProductsAndCategoriesServiceImplTest {
     }
 
     @Test
-    @Order(10)
     void addImageToProduct() {
 
+        Product product = new Product();
+        product.setObjectId(new ObjectId());
+        product.setName("lavender perfume");
 
         byte[] finalFileContent = loadDefaultProductImage();
+
         //test happy scenario
+        when(productRepository.findById(product.getObjectId())).thenReturn(Optional.of(product));
+        when(productRepository.save(product)).thenReturn(product);
         Assertions.assertDoesNotThrow(() ->
                 productsAndCategoriesService.addImageToProduct(finalFileContent
                         , product.getObjectId().toHexString()));
@@ -216,13 +208,23 @@ class ProductsAndCategoriesServiceImplTest {
     }
 
     @Test
-    @Order(11)
     void getImagesOfProduct() throws NoSuchProductException {
+
+        byte[] finalFileContent = loadDefaultProductImage();
+        Product product = new Product();
+        product.setObjectId(new ObjectId());
+        product.setName("lavender perfume");
+        product.setImages(new ArrayList<Binary>());
+        product.getImages().add(new Binary(finalFileContent));
+        product.getImages().add(new Binary(finalFileContent));
+        product.getImages().add(new Binary(finalFileContent));
+
+        when(productRepository.findById(product.getObjectId())).thenReturn(Optional.of(product));
 
         var listOfBinaries = productsAndCategoriesService.getImagesOfProduct(product.getObjectId().toHexString());
 
         Assertions.assertNotNull(listOfBinaries);
-        Assertions.assertEquals(6, listOfBinaries.size());
+        Assertions.assertEquals(3, listOfBinaries.size());
 
         // test if wrong product id used
         Assertions.assertThrows(NoSuchProductException.class, ()
@@ -231,13 +233,24 @@ class ProductsAndCategoriesServiceImplTest {
     }
 
     @Test
-    @Order(12)
     void removeImageFromProduct() {
 
-        Assertions.assertDoesNotThrow(() ->
-                productsAndCategoriesService.removeImageFromProduct(6, product.getObjectId().toHexString()));
+        byte[] finalFileContent = loadDefaultProductImage();
+        Product product = new Product();
+        product.setObjectId(new ObjectId());
+        product.setName("lavender perfume");
+        product.setImages(new ArrayList<>());
+        product.getImages().add(new Binary(finalFileContent));
+        product.getImages().add(new Binary(finalFileContent));
+        product.getImages().add(new Binary(finalFileContent));
 
-        //test if no image exist
+        when(productRepository.findById(product.getObjectId())).thenReturn(Optional.of(product));
+        when(productRepository.save(product)).thenReturn(product);
+
+        Assertions.assertDoesNotThrow(() ->
+                productsAndCategoriesService.removeImageFromProduct(3, product.getObjectId().toHexString()));
+
+        //test if no product exist
         Assertions.assertThrows(NoSuchProductException.class, () ->
                 productsAndCategoriesService.removeImageFromProduct(6, null));
 
@@ -248,8 +261,16 @@ class ProductsAndCategoriesServiceImplTest {
     }
 
     @Test
-    @Order(13)
     void clearImagesFromProduct() throws NoSuchProductException {
+
+        Product product = new Product();
+        product.setObjectId(new ObjectId());
+        product.setName("lavender perfume");
+        product.setImages(new ArrayList<>());
+
+        when(productRepository.findById(product.getObjectId())).thenReturn(Optional.of(product));
+        when(productRepository.save(product)).thenReturn(product);
+
         Assertions.assertDoesNotThrow(() ->
                 productsAndCategoriesService.clearImagesFromProduct(product.getObjectId().toHexString()));
         var productsSize = productsAndCategoriesService.getImagesOfProduct(product.getObjectId().toHexString()).size();
@@ -266,25 +287,39 @@ class ProductsAndCategoriesServiceImplTest {
     }
 
     @Test
-    void removeCategoryFromProduct() throws NoSuchProductException, NoSuchCategoryException {
+    void removeCategoryFromProduct() {
+
+        Category cosmeticsCategory
+                = new Category("Cosmetics", "Make the world beautiful", new HashSet<>());
+        cosmeticsCategory.setObjectId(new ObjectId());
+
+        Product product = new Product();
+        product.setObjectId(new ObjectId());
+        product.setName("lavender perfume");
+        product.setImages(new ArrayList<>());
+        product.setCategories(new ArrayList<>());
+        product.getCategories().add(cosmeticsCategory);
+
+        when(productRepository.findById(product.getObjectId())).thenReturn(Optional.of(product));
+        when(categoryRepository.findById(cosmeticsCategory.getObjectId())).thenReturn(Optional.of(cosmeticsCategory));
+
         Assertions.assertDoesNotThrow(() ->
-                productsAndCategoriesService.removeCategoryFromProduct(category.getObjectId().toHexString(),
+                productsAndCategoriesService.removeCategoryFromProduct(cosmeticsCategory.getObjectId().toHexString(),
                         product.getObjectId().toHexString()));
 
         //test if product id is null
         Assertions.assertThrows(NoSuchProductException.class, () ->
-                productsAndCategoriesService.removeCategoryFromProduct(category.getObjectId().toHexString(), null));
+                productsAndCategoriesService.removeCategoryFromProduct(cosmeticsCategory.getObjectId().toHexString(), null));
 
         //test if category id is null
         Assertions.assertThrows(NoSuchProductException.class, () ->
                 productsAndCategoriesService.removeCategoryFromProduct(null, product.getObjectId().toHexString()));
 
-
     }
 
     @Test
-    void deleteCategory() throws NoSuchCategoryException {
-        Assertions.assertDoesNotThrow(() -> productsAndCategoriesService.deleteCategory(category.getObjectId()));
+    void deleteCategory() {
+        Assertions.assertDoesNotThrow(() -> productsAndCategoriesService.deleteCategory(new ObjectId()));
         //when null category id used then .....
         Assertions.assertThrows(NoSuchCategoryException.class, () ->
                 productsAndCategoriesService.deleteCategory(null));
@@ -292,7 +327,7 @@ class ProductsAndCategoriesServiceImplTest {
 
     @Test
     void deleteProduct() {
-        Assertions.assertDoesNotThrow(() -> productsAndCategoriesService.deleteProduct(product.getObjectId()));
+        Assertions.assertDoesNotThrow(() -> productsAndCategoriesService.deleteProduct(new ObjectId()));
         //when null category id used then .....
         Assertions.assertThrows(NoSuchProductException.class, () ->
                 productsAndCategoriesService.deleteProduct(null));
