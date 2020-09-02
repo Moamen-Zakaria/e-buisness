@@ -274,7 +274,7 @@ public class CartServiceImpl implements CartService {
     public void cancelInvoice(String invoiceId) throws ConnectionErrorException, NoSuchInvoiceException {
         var productsInDeal =
                 productsInDealRepository.findProductsInDealByInvoiceId(invoiceId);
-        if(productsInDeal == null){
+        if (productsInDeal == null) {
             throw new NoSuchInvoiceException();
         }
         payPalService.cancelInvoice(invoiceId);
@@ -282,4 +282,51 @@ public class CartServiceImpl implements CartService {
         productsInDealRepository.save(productsInDeal);
     }
 
+    public ProductsInDealRepository getProductsInDealRepository() {
+        return productsInDealRepository;
+    }
+
+    public void setProductsInDealRepository(ProductsInDealRepository productsInDealRepository) {
+        this.productsInDealRepository = productsInDealRepository;
+    }
+
+    public AuthService getAuthService() {
+        return authService;
+    }
+
+    public void setAuthService(AuthService authService) {
+        this.authService = authService;
+    }
+
+    public MailingService getMailingService() {
+        return mailingService;
+    }
+
+    public void setMailingService(MailingService mailingService) {
+        this.mailingService = mailingService;
+    }
+
+    public ProductsAndCategoriesService getProductsAndCategoriesService() {
+        return productsAndCategoriesService;
+    }
+
+    public void setProductsAndCategoriesService(ProductsAndCategoriesService productsAndCategoriesService) {
+        this.productsAndCategoriesService = productsAndCategoriesService;
+    }
+
+    public ApplicationContext getApplicationContext() {
+        return applicationContext;
+    }
+
+    public void setApplicationContext(ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
+    }
+
+    public PayPalService getPayPalService() {
+        return payPalService;
+    }
+
+    public void setPayPalService(PayPalService payPalService) {
+        this.payPalService = payPalService;
+    }
 }
