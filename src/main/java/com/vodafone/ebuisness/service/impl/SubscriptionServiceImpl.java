@@ -17,10 +17,26 @@ import java.util.Set;
 public class SubscriptionServiceImpl implements SubscriptionService {
 
     @Autowired
-    CategoryRepository categoryRepository;
+    private CategoryRepository categoryRepository;
 
     @Autowired
-    ProductsAndCategoriesService productsAndCategoriesService;
+    private ProductsAndCategoriesService productsAndCategoriesService;
+
+    public CategoryRepository getCategoryRepository() {
+        return categoryRepository;
+    }
+
+    public void setCategoryRepository(CategoryRepository categoryRepository) {
+        this.categoryRepository = categoryRepository;
+    }
+
+    public ProductsAndCategoriesService getProductsAndCategoriesService() {
+        return productsAndCategoriesService;
+    }
+
+    public void setProductsAndCategoriesService(ProductsAndCategoriesService productsAndCategoriesService) {
+        this.productsAndCategoriesService = productsAndCategoriesService;
+    }
 
     @Override
     public void subscribeInCategory(String email, Category category)
