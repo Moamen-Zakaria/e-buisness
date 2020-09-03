@@ -23,16 +23,13 @@ import javax.mail.internet.MimeMessage;
 public class MailingServiceImpl implements MailingService {
 
     @Autowired
-    JavaMailSender javaMailSender;
-
-//    @Autowired
-//    PropertiesLoader propertiesLoader;
+    private JavaMailSender javaMailSender;
 
     @Autowired
-    AuthService authService;
+    private AuthService authService;
 
     @Autowired
-    SubscriptionService subscriptionService;
+    private SubscriptionService subscriptionService;
 
     @Override
     public void sendRegistrationMail(String email, String name) throws MessagingException {
@@ -128,6 +125,30 @@ public class MailingServiceImpl implements MailingService {
 
         sendRegistrationMail(account.getEmail(), account.getPersonName().toString());
 
+    }
+
+    public JavaMailSender getJavaMailSender() {
+        return javaMailSender;
+    }
+
+    public void setJavaMailSender(JavaMailSender javaMailSender) {
+        this.javaMailSender = javaMailSender;
+    }
+
+    public AuthService getAuthService() {
+        return authService;
+    }
+
+    public void setAuthService(AuthService authService) {
+        this.authService = authService;
+    }
+
+    public SubscriptionService getSubscriptionService() {
+        return subscriptionService;
+    }
+
+    public void setSubscriptionService(SubscriptionService subscriptionService) {
+        this.subscriptionService = subscriptionService;
     }
 
 
