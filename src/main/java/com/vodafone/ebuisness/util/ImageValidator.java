@@ -11,10 +11,6 @@ public class ImageValidator {
 
         File file = new File("../temp");
 
-//        file
-
-//        String mimeType = new MimetypesFileTypeMap(new ByteArrayInputStream(bytes)).getContentType("Undetermined");
-
         InputStream is = new BufferedInputStream(new ByteArrayInputStream(bytes));
         String mimeType = null;
         try {
