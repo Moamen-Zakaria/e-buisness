@@ -39,37 +39,13 @@ public class PayPalServiceImpl implements PayPalService {
     private CartService cartService;
 
     @Autowired
-    ApplicationContext applicationContext;
+    private ApplicationContext applicationContext;
 
     private Properties properties;
     private String url;
     private String clientId;
     private String clientSecret;
     private Token token;
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
-    public String getClientId() {
-        return clientId;
-    }
-
-    public void setClientId(String clientId) {
-        this.clientId = clientId;
-    }
-
-    public String getClientSecret() {
-        return clientSecret;
-    }
-
-    public void setClientSecret(String clientSecret) {
-        this.clientSecret = clientSecret;
-    }
 
     public PayPalServiceImpl(Properties properties) {
 
@@ -278,4 +254,59 @@ public class PayPalServiceImpl implements PayPalService {
 
     }
 
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public String getClientId() {
+        return clientId;
+    }
+
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
+    }
+
+    public String getClientSecret() {
+        return clientSecret;
+    }
+
+    public void setClientSecret(String clientSecret) {
+        this.clientSecret = clientSecret;
+    }
+
+    public RestTemplate getRestTemplate() {
+        return restTemplate;
+    }
+
+    public void setRestTemplate(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
+
+    public AuthService getAuthService() {
+        return authService;
+    }
+
+    public void setAuthService(AuthService authService) {
+        this.authService = authService;
+    }
+
+    public CartService getCartService() {
+        return cartService;
+    }
+
+    public void setCartService(CartService cartService) {
+        this.cartService = cartService;
+    }
+
+    public ApplicationContext getApplicationContext() {
+        return applicationContext;
+    }
+
+    public void setApplicationContext(ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
+    }
 }
