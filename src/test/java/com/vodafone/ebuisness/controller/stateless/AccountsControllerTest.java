@@ -30,15 +30,6 @@ class AccountsControllerTest {
 
     @MockBean
     private AccountRepository accountRepository;
-//
-//    @Autowired
-//    private AuthService authService;
-
-//    @Autowired
-//    private MailingService mailingService;
-//
-//    @Autowired
-//    private JwtTokenProviderImpl jwtTokenProvider;
 
     @Autowired
     private MockMvc mockMvc;
