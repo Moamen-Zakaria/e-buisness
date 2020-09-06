@@ -2,6 +2,7 @@ package com.vodafone.ebuisness.util;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -10,6 +11,7 @@ import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringBootTest
 class ImageValidatorTest {
 
     private ImageValidator imageValidator = new ImageValidator();
