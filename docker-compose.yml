@@ -1,0 +1,29 @@
+version: "3"
+services:
+  ebuisness:
+    build: .
+    ports:
+      - 80:80
+    depends_on:
+      - db
+    networks:
+      - main
+#    environment:
+#      - "spring.data.mongodb.database=ebuisness"
+#      - "spring.data.mongodb.host=mongo"
+#      - "spring.data.mongodb.port=27017"
+  db:
+    image: mongo
+    ports:
+      - 27017:27017
+    volumes:
+      - ebuisness-db-volume:/data/db/
+    networks:
+      main:
+        ipv4_address: 172.18.0.2
+
+networks:
+  main:
+
+volumes:
+  ebuisness-db-volume:
